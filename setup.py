@@ -17,7 +17,7 @@ if not os.path.isfile(_VERSION_FILE_PATH):
 
     print(gitaudit_version)
 
-    assert re.fullmatch(r"\d+\.\d+\.\d+"), \
+    assert re.fullmatch(r"\d+\.\d+\.\d+", gitaudit_version), \
         f"No valid version found: {gitaudit_version}!"
 
     with open(_VERSION_FILE_PATH, 'w') as f:
