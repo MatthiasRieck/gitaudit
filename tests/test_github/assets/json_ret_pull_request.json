@@ -1,0 +1,62 @@
+{
+  "title": "gh-95913: Fix grammar for SpooledTemporaryFile 3.11 whatsnew entry",
+  "body": "Followup from #98312.\r\n\n\n<!-- gh-issue-number: gh-95913 -->\n* Issue: gh-95913\n<!-- /gh-issue-number -->\n",
+  "number": 98604,
+  "url": "https://github.com/python/cpython/pull/98604",
+  "headRefName": "JelleZijlstra-patch-1",
+  "baseRefName": "main",
+  "commits": {
+    "nodes": [
+      {
+        "commit": {
+          "oid": "de64f3290a17e2a5af4d6bb971aa55598622b18a",
+          "additions": 1,
+          "deletions": 1,
+          "messageBody": "Followup from #98312.",
+          "messageHeadline": "gh-95913: Fix grammar for SpooledTemporaryFile 3.11 whatsnew entry"
+        }
+      }
+    ]
+  },
+  "repository": {
+    "name": "cpython"
+  },
+  "comments": {
+    "nodes": [
+      {
+        "body": "Thanks @JelleZijlstra for the PR \ud83c\udf2e\ud83c\udf89.. I'm working now to backport this PR to: 3.11.\n\ud83d\udc0d\ud83c\udf52\u26cf\ud83e\udd16 "
+      },
+      {
+        "body": "[GH-98606](https://github.com/python/cpython/pull/98606) is a backport of this pull request to the [3.11 branch](https://github.com/python/cpython/tree/3.11)."
+      }
+    ]
+  },
+  "labels": {
+    "nodes": [
+      {
+        "name": "docs",
+        "color": "09fc59",
+        "id": "MDU6TGFiZWw1Mzg1MTYxMDk="
+      },
+      {
+        "name": "skip news",
+        "color": "000000",
+        "id": "MDU6TGFiZWw2Njc5MjQxNjY="
+      }
+    ]
+  },
+  "author": {
+    "login": "JelleZijlstra"
+  },
+  "reviews": {
+    "nodes": [
+      {
+        "author": {
+          "login": "merwok"
+        },
+        "body": "",
+        "state": "APPROVED"
+      }
+    ]
+  }
+}
