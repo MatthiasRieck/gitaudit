@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+from .change_log_entry import ChangeLogEntry
 
 
 class GitError(Exception):
@@ -33,7 +34,7 @@ def exec_sub_process(args: "list[str]", verbose: "bool") -> "tuple(str, str)":
     )
     output, err = process.communicate()
 
-    output = output.decode("utf-8").strip()
+    output = output.decode("utf-8", "replace").strip()
     err = err.decode("utf-8").strip()
 
     if verbose:
@@ -151,3 +152,78 @@ class Git:
             List(str): List of tags checked out locally
         """
         return self._execute_git_cmd_split_strip("tag", "-l")
+
+    def log(  # pylint: disable=too-many-arguments
+        self,
+        pretty,
+        end_ref, start_ref=None,
+        first_parent=False,
+        submodule=None,
+        patch=False,
+        other=None,
+    ):
+        """Execute git log
+
+        Args:
+            pretty (str): Pretty format
+            end_ref (str): git reference where to start going backwards
+            start_ref (str, optional): git reference where stop going backwards.
+                Defaults to None.
+            first_parent (bool, optional): If true git log only follows the
+                first parent. Defaults to False.
+            submodule (str, optional): Option for submodule diff. Defaults to None.
+            patch (bool, optional): Enable patch output or not. Defaults to False.
+            other (List[str], optional): Additional git log commands. Defaults to None.
+
+        Returns:
+            str: Git log as text
+        """
+        args = [
+            "--no-pager",
+            "log",
+            f"--pretty={pretty}",
+            "--first-parent" if first_parent else None,
+            f"--submodule={submodule}" if submodule else None,
+            "-p" if patch else None,
+            f"{start_ref}..{end_ref}" if start_ref else end_ref,
+        ] + other if other else []
+        args = list(filter(lambda x: x is not None, args))
+
+        output = self._execute_git_cmd(*args)
+        return output
+
+    def changelog(self, end_ref, start_ref=False, first_parent=False, patch=False):
+        """Create changelog
+
+        Args:
+            end_ref (str): git reference where to start going backwards
+            start_ref (str, optional): git reference where stop going backwards.
+                Defaults to None.
+            first_parent (bool, optional): If true git log only follows the
+                first parent. Defaults to False.
+            patch (bool, optional): _description_. Defaults to False.
+            patch (bool, optional): Enable patch output or not. Defaults to False.
+
+        Returns:
+            List[ChangeLogEntry]: the changelog
+        """
+        pretty = (
+            r"#CS#%n"
+            r"H:[%H]%nP:[%P]%nT:[%D]%nS:[%s]%nD:[%cI]%nA:[%an]%nM:[%ae]%n"
+            r"#SB#%n%b%n#EB#%n"
+        )
+
+        log_text = self.log(
+            pretty=pretty,
+            end_ref=end_ref,
+            start_ref=start_ref,
+            submodule="diff",
+            other=["-m", "--numstat"],
+            patch=patch,
+            first_parent=first_parent,
+        )
+
+        return list(map(
+            ChangeLogEntry.from_log_text,
+            filter(lambda x: x, log_text.split('#CS#')),
+        ))
