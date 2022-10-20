@@ -84,12 +84,41 @@ def extract_additions_deletions(numstat_text):
     }, content))
 
 
+def extract_submodule_update(numstat_text):
+    """Extract submodule updates from numstat text
+
+    Args:
+        numstat_text (str): Multiline text block containing the git
+            log num stat and patch information
+
+    Returns:
+        List[Dict[str, any]]: List of dictionaries
+    """
+    content = re.findall(
+        r'Submodule\s*([\d\w\-_]+)\s*([a-f0-9]+)\.{3}([a-f0-9]+)',
+        numstat_text,
+    )
+    return list(map(lambda x: {
+        "submodule_name": x[0],
+        "from_sha": x[1],
+        "to_sha": x[2],
+    }, content))
+
+
 class FileAdditionsDeletions(BaseModel):
     """Dataclass for storing file additions and deletions
     """
     path: str
     additions: int
     deletions: int
+
+
+class SubmoduleUpdate(BaseModel):
+    """Dataclass for storing submodule updates
+    """
+    submodule_name: str
+    from_sha: str
+    to_sha: str
 
 
 class ChangeLogEntry(BaseModel):
@@ -105,6 +134,7 @@ class ChangeLogEntry(BaseModel):
     author_mail: str
     body: str = ''
     numstat: List[FileAdditionsDeletions] = Field(default_factory=list)
+    submodule_updates: List[SubmoduleUpdate] = Field(default_factory=list)
 
     @classmethod
     def from_log_text(cls, log_text):
@@ -144,4 +174,5 @@ class ChangeLogEntry(BaseModel):
             author_mail=extract_line_content(author_mail_line, 'M'),
             body=body_text.strip(),
             numstat=extract_additions_deletions(numstat_text),
+            submodule_updates=extract_submodule_update(numstat_text),
         )

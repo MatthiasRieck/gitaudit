@@ -72,6 +72,24 @@ Pytest Coverage
 2	0	test-requirements.txt
 """.strip()
 
+LOG_SUBMODULE_UDPATE = """
+H:[40cb17241de4c83cd25c5799cc92f5ab8a913a89]
+P:[cdcd2c9e55bae64a511c7e19970a1acf6f1d532a]
+T:[]
+S:[Update git submodules]
+D:[2022-10-20T07:58:44+00:00]
+A:[Zuul]
+M:[zuul@review.opendev.org]
+#SB#
+* Update
+#EB#
+
+
+1	1	tripleo-heat-templates
+
+Submodule tripleo-heat-templates d51bb6de7a...9313779610 (commits not present)
+""".strip()
+
 
 class TestChangeLogEntry(TestCase):
     def test_log_entry_head(self):
@@ -147,3 +165,27 @@ class TestChangeLogEntry(TestCase):
         self.assertEqual(entry.author_name, 'Dummy Name')
         self.assertEqual(entry.author_mail, 'Dummy.Name@domain.com')
         self.assertEqual(entry.body, 'Pytest Coverage')
+
+    def test_submodule_update(self):
+        entry = ChangeLogEntry.from_log_text(LOG_SUBMODULE_UDPATE)
+        self.assertEqual(entry.sha, '40cb17241de4c83cd25c5799cc92f5ab8a913a89')
+        self.assertListEqual(
+            entry.parent_shas,
+            [
+                'cdcd2c9e55bae64a511c7e19970a1acf6f1d532a',
+            ],
+        )
+        self.assertListEqual(entry.tags, [])
+        self.assertListEqual(entry.refs, [])
+        self.assertEqual(
+            entry.subject, 'Update git submodules')
+        self.assertEqual(entry.commit_date, datetime(
+            2022, 10, 20, 7, 58, 44, tzinfo=pytz.utc))
+        self.assertEqual(entry.author_name, 'Zuul')
+        self.assertEqual(entry.author_mail, 'zuul@review.opendev.org')
+        self.assertEqual(entry.body, '* Update')
+
+        self.assertEqual(
+            entry.submodule_updates[0].submodule_name, 'tripleo-heat-templates')
+        self.assertEqual(entry.submodule_updates[0].from_sha, 'd51bb6de7a')
+        self.assertEqual(entry.submodule_updates[0].to_sha, '9313779610')
