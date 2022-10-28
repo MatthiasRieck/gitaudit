@@ -1,7 +1,9 @@
 """Change Log Entry
 """
 
-from typing import List
+from __future__ import annotations
+
+from typing import List, Optional
 from datetime import datetime
 import re
 import pytz
@@ -125,18 +127,23 @@ class ChangeLogEntry(BaseModel):
     """Dataclass for storing change log data
     """
     sha: str
-    parent_shas: List[str] = Field(default_factory=list)
-    tags: List[str] = Field(default_factory=list)
-    refs: List[str] = Field(default_factory=list)
-    subject: str
-    commit_date: datetime
-    author_name: str
-    author_mail: str
-    body: str = ''
-    numstat: List[FileAdditionsDeletions] = Field(default_factory=list)
-    submodule_updates: List[SubmoduleUpdate] = Field(default_factory=list)
+    parent_shas: Optional[List[str]] = Field(default_factory=list)
+    other_parents: Optional[List[ChangeLogEntry]] = Field(default_factory=list)
+    branch_offs: Optional[List[ChangeLogEntry]] = Field(default_factory=list)
+    tags: Optional[List[str]] = Field(default_factory=list)
+    refs: Optional[List[str]] = Field(default_factory=list)
+    subject: Optional[str]
+    commit_date: Optional[datetime]
+    author_name: Optional[str]
+    author_mail: Optional[str]
+    body: Optional[str] = ''
+    numstat: Optional[
+        List[FileAdditionsDeletions]
+    ] = Field(default_factory=list)
+    submodule_updates: Optional[List[SubmoduleUpdate]] = Field(
+        default_factory=list)
 
-    @classmethod
+    @ classmethod
     def from_log_text(cls, log_text):
         """Create ChangeLogEntry from logging text
 
@@ -175,4 +182,20 @@ class ChangeLogEntry(BaseModel):
             body=body_text.strip(),
             numstat=extract_additions_deletions(numstat_text),
             submodule_updates=extract_submodule_update(numstat_text),
+        )
+
+    @classmethod
+    def from_head_log_text(cls, log_text):
+        """Create ChangeLogEntry from logging text
+
+        Args:
+            log_text (str): Logging text
+
+        Returns:
+            ChangeLogEntry: Change log entry dataclass
+        """
+        shas = re.findall('[a-f0-9]+', log_text)
+        return ChangeLogEntry(
+            sha=shas[0],
+            parent_shas=shas[1:],
         )
