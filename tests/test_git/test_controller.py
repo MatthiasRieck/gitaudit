@@ -117,3 +117,14 @@ class TestGit(TestCase):
             ['main', 'dev', 'feature'],
         )
         self.assert_git_called_with_args('tag', '-l')
+
+    def test_log(self):
+        self.append_process_return_text(
+            '27686336213\n12876371637123\n217283671623')
+        self.assertListEqual(
+            Git('', '').log(pretty='%H', end_ref='main').split('\n'),
+            ['27686336213', '12876371637123', '217283671623'],
+        )
+        self.assert_git_called_with_args(
+            '--no-pager', 'log', '--pretty=%H', 'main'
+        )

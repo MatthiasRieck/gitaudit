@@ -64,6 +64,7 @@ class Git:
         exec_sub_process([
             "git",
             "clone",
+            "-q",
             self.remote,
             self.local,
         ], self.verbose)
@@ -186,7 +187,7 @@ class Git:
             f"--submodule={submodule}" if submodule else None,
             "-p" if patch else None,
             f"{start_ref}..{end_ref}" if start_ref else end_ref,
-        ] + other if other else []
+        ] + (other if other else [])
         args = list(filter(lambda x: x is not None, args))
 
         output = self._execute_git_cmd(*args)
