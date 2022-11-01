@@ -120,6 +120,13 @@ class TestTree(TestCase):
             ['e', 'f'],
         )
 
+        for seg in tree.iter_segments():
+            assert seg.shas in [
+                ['a', 'b'],
+                ['c', 'd'],
+                ['e', 'f'],
+            ]
+
     def test_across_branch_point(self):
         EXAMPLE = [
             "d[c]",

@@ -130,3 +130,16 @@ class Tree(BaseModel):
                 else:
                     self.root = current_segment_pre
                     new_segment = None
+
+    def iter_segments(self):
+        """Iterate Tree Segments
+
+        Yields:
+            Segment: Iterated Tree Segment
+        """
+        queue = [self.root]
+
+        while queue:
+            seg = queue.pop(0)
+            yield seg
+            queue.extend(seg.children.values())
