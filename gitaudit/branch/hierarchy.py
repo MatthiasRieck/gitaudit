@@ -38,13 +38,13 @@ def take_first_parent_log(initial_sha, take_map, full_map):
 
         curr_first_parent_sha = curr_entry.parent_shas[0]
 
-    return fp_log, take_map
+    return list(reversed(fp_log)), take_map
 
 
 def _recursive_hierarchy_log(initial_sha, take_map, full_map):
     hie_log, take_map = take_first_parent_log(initial_sha, take_map, full_map)
 
-    for entry in reversed(hie_log):
+    for entry in hie_log:
         for p_sha in entry.parent_shas[1:]:
             if p_sha not in take_map:
                 entry.branch_offs.append(full_map[p_sha])

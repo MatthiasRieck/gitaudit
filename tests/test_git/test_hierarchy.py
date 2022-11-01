@@ -16,7 +16,7 @@ class TestUtils(TestCase):
             map(lambda x: ChangeLogEntry.from_head_log_text(x), EXAMPLE_A))
         hier_log = linear_log_to_hierarchy_log(lin_log)
 
-        self.assertListEqual(lin_log, hier_log)
+        self.assertListEqual(list(reversed(lin_log)), hier_log)
 
     def test_example_b(self):
         EXAMPLE_B = [
@@ -36,7 +36,7 @@ class TestUtils(TestCase):
         d.other_parents = [[c]]
         c.branch_offs = [a]
 
-        self.assertEqual([d, b, a], hier_log)
+        self.assertEqual([a, b, d], hier_log)
 
     def test_example_c(self):
         EXAMPLE_C = [
@@ -64,11 +64,11 @@ class TestUtils(TestCase):
         c.branch_offs = [d]
         b.other_parents = [[c]]
         five.branch_offs = [three]
-        f.other_parents = [[four, five]]
+        f.other_parents = [[five, four]]
         three.branch_offs = [one]
-        a.other_parents = [[f, two, three]]
+        a.other_parents = [[three, two, f]]
 
-        self.assertEqual([a, b, d, e, one], hier_log)
+        self.assertEqual([one, e, d, b, a], hier_log)
 
     def test_initil_commit(self):
         EXAMPLE_INITIAL_COMMIT = ["a[]"]
@@ -99,7 +99,7 @@ class TestUtils(TestCase):
         d.branch_offs = [b]
         a.other_parents = [[c], [d]]
 
-        self.assertEqual([a, b], hier_log)
+        self.assertEqual([b, a], hier_log)
 
     def test_multi_merge(self):
         EXAMPLE_MULTI_MERGE = [
@@ -122,7 +122,7 @@ class TestUtils(TestCase):
         e.branch_offs = [f]
         a.other_parents = [[e]]
 
-        self.assertEqual([a, b, c], hier_log)
+        self.assertEqual([c, b, a], hier_log)
 
     def test_parent_sha_already_taken(self):
         EXAMPLE_MULTI_MERGE = [
@@ -145,4 +145,4 @@ class TestUtils(TestCase):
         _2ae.branch_offs = [_63b, _d86]
         _2b2.other_parents = [[_2ae]]
 
-        self.assertEqual([_2b2, _c9c, _63b], hier_log)
+        self.assertEqual([_63b, _c9c, _2b2], hier_log)
