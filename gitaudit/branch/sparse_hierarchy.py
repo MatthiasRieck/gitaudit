@@ -48,10 +48,10 @@ def extract_sparse_lin_log(lin_log, start_sha):
     # find the relevant first parent range and append these to the
     # list of lin_log
     start_index = fpl_shas.index(start_sha)
-    end_index = max(
+    end_index = min(
         list(map(lambda x: fpl_shas.index(x), fpl_branch_off_shas)))
 
-    for sha in fpl_shas[start_index:(end_index+1)]:
+    for sha in fpl_shas[end_index:(start_index+1)]:
         analysis_lin_log[sha] = full_map[sha]
 
     # purge all parent shas from the lin_log that are not part of the
