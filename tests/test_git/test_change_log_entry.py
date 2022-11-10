@@ -189,3 +189,18 @@ class TestChangeLogEntry(TestCase):
             entry.submodule_updates[0].submodule_name, 'tripleo-heat-templates')
         self.assertEqual(entry.submodule_updates[0].from_sha, 'd51bb6de7a')
         self.assertEqual(entry.submodule_updates[0].to_sha, '9313779610')
+
+    def test_copy_without_hierarchy(self):
+        entry = ChangeLogEntry(
+            sha='245',
+            parent_shas=['343', '232'],
+            other_parents=[
+                [ChangeLogEntry(sha="33"), ChangeLogEntry(sha="55")]
+            ],
+            branch_offs=[ChangeLogEntry(sha="87")],
+        )
+
+        copy_entry = entry.copy_without_hierarchy()
+
+        self.assertListEqual(copy_entry.branch_offs, [])
+        self.assertListEqual(copy_entry.other_parents, [])
