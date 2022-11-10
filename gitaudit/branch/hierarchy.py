@@ -73,3 +73,41 @@ def linear_log_to_hierarchy_log(lin_log):
         lin_log[0].sha, take_map, full_map)
 
     return hie_log
+
+
+def hierarchy_log_to_linear_log_entry(entry):
+    """For a log entry remove hierarchy and return
+    as linear log
+
+    Args:
+        entry (ChangeLogEntry): the log entry
+
+    Returns:
+        List[ChangeLogEntry]: Linear Log
+    """
+
+    parent_hier_logs = entry.other_parents
+    lin_log = [entry.copy_without_hierarchy()]
+
+    for p_hier_log in parent_hier_logs:
+        lin_log.extend(hierarchy_log_to_linear_log(p_hier_log))
+
+    return lin_log
+
+
+def hierarchy_log_to_linear_log(hier_log):
+    """For a list of log entries remove hierarchy and
+    return as linear log
+
+    Args:
+        hier_log (List[ChangeLogEntry]): the list of log entries
+
+    Returns:
+        List[ChangeLogEntry]: Linear Log
+    """
+    lin_log = []
+
+    for entry in reversed(hier_log):
+        lin_log.extend(hierarchy_log_to_linear_log_entry(entry))
+
+    return lin_log

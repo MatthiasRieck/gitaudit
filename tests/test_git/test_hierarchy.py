@@ -1,9 +1,9 @@
 from unittest import TestCase
-from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log
+from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log, hierarchy_log_to_linear_log
 from gitaudit.git.change_log_entry import ChangeLogEntry
 
 
-class TestUtils(TestCase):
+class TestLinearLogToHierarchyLog(TestCase):
     def test_example_a(self):
         EXAMPLE_A = [
             "d[c]",
@@ -146,3 +146,79 @@ class TestUtils(TestCase):
         _2b2.other_parents = [[_2ae]]
 
         self.assertEqual([_63b, _c9c, _2b2], hier_log)
+
+
+class TestHierarchyLogToLinearLog(TestCase):
+    def test_multi_merge(self):
+        EXAMPLE_MULTI_MERGE = [
+            "a[b e]",
+            "b[c f]",
+            "c[]",
+            "e[f]",
+            "f[c]",
+        ]
+        lin_log = list(
+            map(lambda x: ChangeLogEntry.from_head_log_text(x), EXAMPLE_MULTI_MERGE))
+        hier_log = linear_log_to_hierarchy_log(lin_log)
+        lin_log_cpy = hierarchy_log_to_linear_log(hier_log)
+
+        self.assertListEqual(
+            ['a', 'e', 'b', 'f', 'c'],
+            list(map(lambda x: x.sha, lin_log_cpy))
+        )
+
+    def test_example_c(self):
+        EXAMPLE_C = [
+            "a[b f]",
+            "b[d c]",
+            "d[e]",
+            "c[d]",
+            "e[1]",
+            "1[]",
+            "f[2 4]",
+            "2[3]",
+            "3[1]",
+            "4[5]",
+            "5[3]",
+        ]
+
+        lin_log = list(
+            map(lambda x: ChangeLogEntry.from_head_log_text(x), EXAMPLE_C))
+        hier_log = linear_log_to_hierarchy_log(lin_log)
+        lin_log_cpy = hierarchy_log_to_linear_log(hier_log)
+
+        self.assertListEqual(
+            ['a', 'f', '4', '5', '2', '3', 'b', 'c', 'd', 'e', '1'],
+            list(map(lambda x: x.sha, lin_log_cpy))
+        )
+
+    def test_initil_commit(self):
+        EXAMPLE_INITIAL_COMMIT = ["a[]"]
+
+        lin_log = list(
+            map(lambda x: ChangeLogEntry.from_head_log_text(x), EXAMPLE_INITIAL_COMMIT))
+        hier_log = linear_log_to_hierarchy_log(lin_log)
+        lin_log_cpy = hierarchy_log_to_linear_log(hier_log)
+
+        self.assertListEqual(
+            ['a'],
+            list(map(lambda x: x.sha, lin_log_cpy))
+        )
+
+    def test_octor_merge(self):
+        EXAMPLE_OCTO_MERGE = [
+            "a[b, c, d]",
+            "b[]",
+            "c[b]",
+            "d[b]",
+        ]
+
+        lin_log = list(
+            map(lambda x: ChangeLogEntry.from_head_log_text(x), EXAMPLE_OCTO_MERGE))
+        hier_log = linear_log_to_hierarchy_log(lin_log)
+        lin_log_cpy = hierarchy_log_to_linear_log(hier_log)
+
+        self.assertListEqual(
+            ['a', 'c', 'd', 'b'],
+            list(map(lambda x: x.sha, lin_log_cpy))
+        )

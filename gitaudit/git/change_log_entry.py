@@ -128,7 +128,8 @@ class ChangeLogEntry(BaseModel):
     """
     sha: str
     parent_shas: Optional[List[str]] = Field(default_factory=list)
-    other_parents: Optional[List[ChangeLogEntry]] = Field(default_factory=list)
+    other_parents: Optional[List[List[ChangeLogEntry]]] \
+        = Field(default_factory=list)
     branch_offs: Optional[List[ChangeLogEntry]] = Field(default_factory=list)
     tags: Optional[List[str]] = Field(default_factory=list)
     refs: Optional[List[str]] = Field(default_factory=list)
@@ -142,6 +143,16 @@ class ChangeLogEntry(BaseModel):
     ] = Field(default_factory=list)
     submodule_updates: Optional[List[SubmoduleUpdate]] = Field(
         default_factory=list)
+
+    def copy_without_hierarchy(self):
+        """Copy Itself without hierarchy elements
+        (branch_offs, other_parents)
+
+        Returns:
+            ChangeLogEntry: the copied entry
+        """
+        copy_dict = self.dict(exclude={'branch_offs', 'other_parents'})
+        return ChangeLogEntry.parse_obj(copy_dict)
 
     @ classmethod
     def from_log_text(cls, log_text):
