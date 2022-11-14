@@ -27,7 +27,7 @@ class TestTree(TestCase):
 
         self.assertEqual(
             tree.root.shas,
-            ['a', 'b', 'c', 'd'],
+            ['d', 'c', 'b', 'a'],
         )
 
     def test_add_longer(self):
@@ -46,7 +46,7 @@ class TestTree(TestCase):
 
         self.assertEqual(
             tree.root.shas,
-            ['a', 'b', 'c', 'd'],
+            ['d', 'c', 'b', 'a'],
         )
 
     def test_add_shorter(self):
@@ -65,7 +65,7 @@ class TestTree(TestCase):
 
         self.assertEqual(
             tree.root.shas,
-            ['a', 'b', 'c', 'd'],
+            ['d', 'c', 'b', 'a'],
         )
 
     def test_add_same(self):
@@ -84,7 +84,7 @@ class TestTree(TestCase):
 
         self.assertEqual(
             tree.root.shas,
-            ['a', 'b', 'c', 'd'],
+            ['d', 'c', 'b', 'a'],
         )
 
     def test_add_branch_off(self):
@@ -109,22 +109,22 @@ class TestTree(TestCase):
 
         self.assertEqual(
             tree.root.shas,
-            ['a', 'b'],
+            ['b', 'a'],
         )
         self.assertEqual(
             tree.root.children['c'].shas,
-            ['c', 'd'],
+            ['d', 'c'],
         )
         self.assertEqual(
             tree.root.children['e'].shas,
-            ['e', 'f'],
+            ['f', 'e'],
         )
 
         for seg in tree.iter_segments():
             assert seg.shas in [
-                ['a', 'b'],
-                ['c', 'd'],
-                ['e', 'f'],
+                ['b', 'a'],
+                ['d', 'c'],
+                ['f', 'e'],
             ]
 
     def test_across_branch_point(self):
@@ -157,11 +157,11 @@ class TestTree(TestCase):
 
         self.assertEqual(
             tree.root.shas,
-            ['a', 'b'],
+            ['b', 'a'],
         )
         self.assertEqual(
             tree.root.children['c'].shas,
-            ['c', 'd'],
+            ['d', 'c'],
         )
         self.assertEqual(
             tree.root.children['e'].shas,
@@ -208,15 +208,15 @@ class TestTree(TestCase):
 
         self.assertEqual(
             tree.root.shas,
-            ['a', 'b'],
+            ['b', 'a'],
         )
         self.assertEqual(
             tree.root.children['c'].shas,
-            ['c', 'd'],
+            ['d', 'c'],
         )
         self.assertEqual(
             tree.root.children['e'].shas,
-            ['e', 'f', '4', '3'],
+            ['3', '4', 'f', 'e'],
         )
 
     def test_add_branch_already_at_branch_point(self):
@@ -249,17 +249,17 @@ class TestTree(TestCase):
 
         self.assertEqual(
             tree.root.shas,
-            ['a', 'b'],
+            ['b', 'a'],
         )
         self.assertEqual(
             tree.root.children['c'].shas,
-            ['c', 'd'],
+            ['d', 'c'],
         )
         self.assertEqual(
             tree.root.children['e'].shas,
-            ['e', 'f'],
+            ['f', 'e'],
         )
         self.assertEqual(
             tree.root.children['3'].shas,
-            ['3', '4'],
+            ['4', '3'],
         )
