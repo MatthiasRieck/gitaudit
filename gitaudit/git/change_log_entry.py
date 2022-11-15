@@ -128,6 +128,7 @@ class ChangeLogEntry(BaseModel):
     """
     sha: str
     parent_shas: Optional[List[str]] = Field(default_factory=list)
+    cherry_pick_sha: Optional[str]
     other_parents: Optional[List[List[ChangeLogEntry]]] \
         = Field(default_factory=list)
     branch_offs: Optional[List[ChangeLogEntry]] = Field(default_factory=list)
@@ -155,7 +156,7 @@ class ChangeLogEntry(BaseModel):
         return ChangeLogEntry.parse_obj(copy_dict)
 
     @ classmethod
-    def from_log_text(cls, log_text):
+    def from_log_text(cls, log_text):  # pylint: disable=too-many-locals
         """Create ChangeLogEntry from logging text
 
         Args:
@@ -166,6 +167,11 @@ class ChangeLogEntry(BaseModel):
         """
         item_text, rest_text = log_text.split('#SB#')
         body_text, numstat_text = rest_text.split('#EB#')
+
+        cherry_picked_commits = re.findall(
+            r"(?<=\(cherry\spicked\sfrom\scommit\s)[a-f0-9]+(?=\))",
+            body_text,
+        )
 
         (
             sha_line,
@@ -191,6 +197,8 @@ class ChangeLogEntry(BaseModel):
             author_name=extract_line_content(author_name_line, 'A'),
             author_mail=extract_line_content(author_mail_line, 'M'),
             body=body_text.strip(),
+            cherry_pick_sha=cherry_picked_commits[0] if len(
+                cherry_picked_commits) == 1 else None,
             numstat=extract_additions_deletions(numstat_text),
             submodule_updates=extract_submodule_update(numstat_text),
         )
