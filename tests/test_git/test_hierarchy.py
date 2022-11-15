@@ -1,5 +1,9 @@
 from unittest import TestCase
-from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log, hierarchy_log_to_linear_log
+from unittest.mock import MagicMock
+from gitaudit.branch.hierarchy import \
+    linear_log_to_hierarchy_log, \
+    hierarchy_log_to_linear_log, \
+    changelog_hydration
 from gitaudit.git.change_log_entry import ChangeLogEntry
 
 
@@ -222,3 +226,50 @@ class TestHierarchyLogToLinearLog(TestCase):
             ['a', 'c', 'd', 'b'],
             list(map(lambda x: x.sha, lin_log_cpy))
         )
+
+
+class TestChangeLogHydration(TestCase):
+    def test_changelog_hydration(self):
+        EXAMPLE_B = [
+            "d[b, c]",
+            "c[a]",
+            "b[a]",
+            "a[]",
+        ]
+
+        lin_log = list(
+            map(lambda x: ChangeLogEntry.from_head_log_text(x), EXAMPLE_B))
+        hier_log = linear_log_to_hierarchy_log(lin_log)
+
+        git_mock = MagicMock()
+        git_mock.log_changelog.return_value = [
+            ChangeLogEntry(
+                sha='d',
+                parent_shas=['b', 'c'],
+                subject='D Commit'
+            ),
+            ChangeLogEntry(
+                sha='c',
+                parent_shas=['a'],
+                subject='C Commit'
+            ),
+            ChangeLogEntry(
+                sha='a',
+                parent_shas=[],
+                subject='A Commit'
+            ),
+        ]
+        git_mock.show_changelog_entry.return_value = ChangeLogEntry(
+            sha='b',
+            parent_shas=['a'],
+            subject='B Commit'
+        )
+
+        hier_log = changelog_hydration(hier_log, git_mock)
+        self.assertEqual(hier_log[0].subject, 'D Commit')
+        self.assertEqual(
+            hier_log[0].other_parents[0][0].subject,
+            'C Commit',
+        )
+        self.assertEqual(hier_log[1].subject, 'B Commit')
+        self.assertEqual(hier_log[2].subject, 'A Commit')
