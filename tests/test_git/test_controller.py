@@ -1,7 +1,12 @@
 from unittest import TestCase
 from unittest.mock import patch
 
+from datetime import datetime
+
 from gitaudit.git.controller import Git
+from gitaudit.git.change_log_entry import ChangeLogEntry, FileAdditionsDeletions
+
+from .test_change_log_entry import LOG_ENTRY_HEAD, LOG_ENTRY_NO_PARENT
 
 
 class ProcessMock:
@@ -127,4 +132,88 @@ class TestGit(TestCase):
         )
         self.assert_git_called_with_args(
             '--no-pager', 'log', '--pretty=%H', 'main'
+        )
+
+    def test_log_parentlog(self):
+        self.append_process_return_text(
+            'c[b]\nb[a]\na[]'
+        )
+        self.assertListEqual(
+            Git('', '').log_parentlog(end_ref='main'),
+            [
+                ChangeLogEntry(sha='c', parent_shas=['b']),
+                ChangeLogEntry(sha='b', parent_shas=['a']),
+                ChangeLogEntry(sha='a', parent_shas=[]),
+            ],
+        )
+        self.assert_git_called_with_args(
+            '--no-pager', 'log', '--pretty=%H[%P]', 'main'
+        )
+
+    def test_log_changelog(self):
+        self.append_process_return_text(
+            "#CS#\n"+LOG_ENTRY_HEAD+"#CS#\n"+LOG_ENTRY_NO_PARENT
+        )
+        changelog = Git('', '').log_changelog(end_ref='main')
+
+        self.assertListEqual(
+            list(map(lambda x: x.sha, changelog)),
+            [
+                "b74c293300e1afcec19c44369fc9cdc2236b2ee4",
+                "8d0be78827d398c01bc8288d7a381f5402fb1931",
+            ],
+        )
+        self.assert_git_called_with_args(
+            '--no-pager', 'log', (
+                r"--pretty=#CS#%n"
+                r"H:[%H]%nP:[%P]%nT:[%D]%nS:[%s]%nD:[%cI]%nA:[%an]%nM:[%ae]%n"
+                r"#SB#%n%b%n#EB#%n"
+            ), '--submodule=diff', 'main', "-m", "--numstat"
+        )
+
+    def test_show(self):
+        self.append_process_return_text(
+            '27686336213'
+        )
+        self.assertEqual(
+            Git('', '').show(pretty='%H', ref='main'),
+            '27686336213',
+        )
+        self.assert_git_called_with_args(
+            'show', '--pretty=%H', 'main'
+        )
+
+    def test_show_parentlog_entry(self):
+        self.append_process_return_text(
+            'b[a]'
+        )
+        self.assertEqual(
+            Git('', '').show_parentlog_entry(ref='b'),
+            ChangeLogEntry(sha='b', parent_shas=['a']),
+        )
+        self.assert_git_called_with_args(
+            'show', '--pretty=%H[%P]', 'b'
+        )
+
+    def test_show_changelog_entry(self):
+        self.append_process_return_text(
+            LOG_ENTRY_HEAD
+        )
+        self.assertEqual(
+            Git('', '').show_changelog_entry(ref='main'),
+            ChangeLogEntry(
+                sha='b74c293300e1afcec19c44369fc9cdc2236b2ee4',
+                parent_shas=['73ee81321f193db02a452d3f122b10bcd92bec17'],
+                refs=['git-log'],
+                subject='numstat without patch',
+                commit_date=datetime.fromisoformat(
+                    '2022-10-18T21:02:44+02:00'),
+                author_name='Dummy Name',
+                author_mail='Dummy.Name@domain.com',
+                numstat=[FileAdditionsDeletions(
+                    path='gitaudit/git/controller.py',
+                    additions=4,
+                    deletions=3,
+                )],
+            )
         )

@@ -193,7 +193,42 @@ class Git:
         output = self._execute_git_cmd(*args)
         return output
 
-    def changelog(self, end_ref, start_ref=False, first_parent=False, patch=False):
+    def show(  # pylint: disable=too-many-arguments
+        self,
+        pretty,
+        ref,
+        submodule=None,
+        patch=False,
+        other=None,
+    ):
+        """Shows information for a single commit / ref
+
+        Args:
+            pretty (str): Pretty Text for Logging
+            ref (str): Ref (branch, tag, sha)
+            submodule (str, optional): How subodule changes are shown.
+                Defaults to None.
+            patch (bool, optional): Whether to show patch info.
+                Defaults to False.
+            other (List[str], optional): Additional arguments.
+                Defaults to None.
+
+        Returns:
+            str: git show information as text
+        """
+        args = [
+            "show",
+            f"--pretty={pretty}",
+            f"--submodule={submodule}" if submodule else None,
+            "-p" if patch else None,
+            ref,
+        ] + (other if other else [])
+        args = list(filter(lambda x: x is not None, args))
+
+        output = self._execute_git_cmd(*args)
+        return output
+
+    def log_changelog(self, end_ref, start_ref=False, first_parent=False, patch=False):
         """Create changelog
 
         Args:
@@ -228,3 +263,66 @@ class Git:
             ChangeLogEntry.from_log_text,
             filter(lambda x: x, log_text.split('#CS#')),
         ))
+
+    def show_changelog_entry(self, ref, patch=False):
+        """Show single changelog entry
+
+        Args:
+            ref (str): Ref (branch, tag, sha)
+            patch (bool, optional): Whether to show patch information.
+                Defaults to False.
+
+        Returns:
+            ChangeLogEntry: change log entry
+        """
+        pretty = (
+            r"H:[%H]%nP:[%P]%nT:[%D]%nS:[%s]%nD:[%cI]%nA:[%an]%nM:[%ae]%n"
+            r"#SB#%n%b%n#EB#%n"
+        )
+
+        log_text = self.show(
+            pretty=pretty,
+            ref=ref,
+            submodule="diff",
+            other=["-m", "--numstat"],
+            patch=patch,
+        )
+
+        return ChangeLogEntry.from_log_text(log_text)
+
+    def log_parentlog(self, end_ref):
+        """Given an end_ref this function
+        will return ChangeLogEntry list (linear log)
+        with sha and parent shas which can
+        be used to construct a hierarchy log
+
+        Args:
+            end_ref (str): End Ref
+
+        Returns:
+            List[ChangeLogEntry]: Linear ChangeLogEntry log
+        """
+        log_text = self.log(
+            pretty="%H[%P]",
+            end_ref=end_ref,
+        )
+        return list(map(
+            ChangeLogEntry.from_head_log_text,
+            log_text.split("\n"),
+        ))
+
+    def show_parentlog_entry(self, ref):
+        """Show parent log entry information
+
+        Args:
+            ref (str): Ref (branch, tag, sha)
+
+        Returns:
+            ChangeLogEntry: change log entry with parent
+                information
+        """
+        log_text = self.show(
+            pretty="%H[%P]",
+            ref=ref,
+        )
+        return ChangeLogEntry.from_head_log_text(log_text)
