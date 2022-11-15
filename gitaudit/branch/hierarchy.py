@@ -111,3 +111,46 @@ def hierarchy_log_to_linear_log(hier_log):
         lin_log.extend(hierarchy_log_to_linear_log_entry(entry))
 
     return lin_log
+
+
+def changelog_hydration(log, git, changelog_map=None):
+    """Hydrates a parent log with changelog entries
+
+    Args:
+        log (List[ChangeLogEntry]): Parent log
+        git (Git): Git instance
+        changelog_map (Dict[str, ChangeLogEntry], optional): Dictionary sha -> ChangeLogEntry.
+            Defaults to None.
+
+    Returns:
+        List[ChangeLogEntry]: Change Log
+    """
+    if changelog_map is None:
+        end_sha = log[0].sha
+        start_sha_parent_sha = \
+            log[-1].parent_shas[0] if log[-1].parent_shas else None
+        changelog = git.log_changelog(
+            end_ref=end_sha,
+            start_ref=start_sha_parent_sha,
+            patch=True,
+        )
+        changelog_map = {x.sha: x for x in changelog}
+
+    for index, entry in enumerate(log):
+        if entry.sha in changelog_map:
+            changelog_entry = changelog_map[entry.sha]
+        else:
+            changelog_entry = git.show_changelog_entry(entry.sha)
+
+        assert entry.sha == changelog_entry.sha
+        assert entry.parent_shas == changelog_entry.parent_shas
+
+        log[index] = changelog_entry
+
+        for o_parent in entry.other_parents:
+            changelog_entry.other_parents.append(changelog_hydration(
+                o_parent,
+                git,
+                changelog_map,
+            ))
+    return log
