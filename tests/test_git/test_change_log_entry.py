@@ -47,6 +47,8 @@ A:[Dummy Name]
 M:[Dummy.Name@domain.com]
 #SB#
 Update setup.py
+
+(cherry picked from commit e063c23c65143a3afae3e201459dc0d52cb6fc96)
 #EB#
 
 
@@ -109,6 +111,7 @@ class TestChangeLogEntry(TestCase):
         self.assertEqual(entry.numstat[0].additions, 4)
         self.assertEqual(entry.numstat[0].deletions, 3)
         self.assertEqual(entry.numstat[0].path, "gitaudit/git/controller.py")
+        self.assertIsNone(entry.cherry_pick_sha)
 
     def test_no_parents_initial_commit(self):
         entry = ChangeLogEntry.from_log_text(LOG_ENTRY_NO_PARENT)
@@ -135,11 +138,22 @@ class TestChangeLogEntry(TestCase):
         self.assertEqual(entry.numstat[2].deletions, 0)
         self.assertEqual(entry.numstat[2].path, "README.md")
 
+        self.assertIsNone(entry.cherry_pick_sha)
+
     def test_tags(self):
         entry = ChangeLogEntry.from_log_text(LOG_ENTRY_TAGS)
         self.assertEqual(entry.sha, 'cd8c9ebdade2a02630cf9beb370d22a821c25101')
-        self.assertListEqual(entry.parent_shas, [
-                             '53f3875dfe189e1d5c59d60129a011c3c4ae8b60', '0c71bc7d2bcf1b357f033ffbbf14b8c3468a82dc'])
+        self.assertListEqual(
+            entry.parent_shas,
+            [
+                '53f3875dfe189e1d5c59d60129a011c3c4ae8b60',
+                '0c71bc7d2bcf1b357f033ffbbf14b8c3468a82dc',
+            ],
+        )
+        self.assertEqual(
+            entry.cherry_pick_sha,
+            'e063c23c65143a3afae3e201459dc0d52cb6fc96'
+        )
         self.assertListEqual(entry.tags, ['dummtag', '0.0.2'])
         self.assertListEqual(entry.refs, [])
         self.assertEqual(
@@ -148,7 +162,11 @@ class TestChangeLogEntry(TestCase):
             2022, 10, 13, 6, 16, 3, tzinfo=pytz.utc))
         self.assertEqual(entry.author_name, 'Dummy Name')
         self.assertEqual(entry.author_mail, 'Dummy.Name@domain.com')
-        self.assertEqual(entry.body, 'Update setup.py')
+        self.assertEqual(entry.body, (
+            'Update setup.py\n'
+            '\n'
+            '(cherry picked from commit e063c23c65143a3afae3e201459dc0d52cb6fc96)'
+        ))
 
     def test_refs(self):
         entry = ChangeLogEntry.from_log_text(LOG_ENTRY_REFS)
@@ -165,6 +183,8 @@ class TestChangeLogEntry(TestCase):
         self.assertEqual(entry.author_name, 'Dummy Name')
         self.assertEqual(entry.author_mail, 'Dummy.Name@domain.com')
         self.assertEqual(entry.body, 'Pytest Coverage')
+
+        self.assertIsNone(entry.cherry_pick_sha)
 
     def test_submodule_update(self):
         entry = ChangeLogEntry.from_log_text(LOG_SUBMODULE_UDPATE)
@@ -189,6 +209,8 @@ class TestChangeLogEntry(TestCase):
             entry.submodule_updates[0].submodule_name, 'tripleo-heat-templates')
         self.assertEqual(entry.submodule_updates[0].from_sha, 'd51bb6de7a')
         self.assertEqual(entry.submodule_updates[0].to_sha, '9313779610')
+
+        self.assertIsNone(entry.cherry_pick_sha)
 
     def test_copy_without_hierarchy(self):
         entry = ChangeLogEntry(
