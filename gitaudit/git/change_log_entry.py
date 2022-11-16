@@ -218,3 +218,15 @@ class ChangeLogEntry(BaseModel):
             sha=shas[0],
             parent_shas=shas[1:],
         )
+
+    @classmethod
+    def list_from_objects(cls, items: List[dict]):
+        """Given a list of dict objects create a list of ChangeLogEntries
+
+        Args:
+            items (List[dict]): List of dict objects
+
+        Returns:
+            List[ChangeLogEntry]: List of ChangeLogEntries
+        """
+        return [ChangeLogEntry.parse_obj(x) for x in items]
