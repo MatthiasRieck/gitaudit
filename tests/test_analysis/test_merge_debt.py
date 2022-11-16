@@ -1,7 +1,8 @@
 from unittest import TestCase
 
 from gitaudit.git.change_log_entry import ChangeLogEntry
-from gitaudit.analysis.merge_debt import get_head_base_hier_logs
+from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log
+from gitaudit.analysis.merge_debt import get_head_base_hier_logs, BucketEntry
 
 MAIN_JSON_LOG = [
     {
@@ -78,3 +79,126 @@ class TestGetHeadBaseHierLogs(TestCase):
             list(map(lambda x: x.sha, base)),
             ['d', 'c'],
         )
+
+
+class TestBucketEntry(TestCase):
+    def test_branched_version(self):
+        # a
+        # | \
+        # |  \
+        # b   f
+        # |\  |\
+        # | c 2 4
+        # |/  | |
+        # d   | 5
+        # |   |/
+        # e   3
+        # |  /
+        # |/
+        # 1
+
+        EXAMPLE_C = [
+            "a[b f]",
+            "b[d c]",
+            "d[e]",
+            "c[d]",
+            "e[1]",
+            "1[]",
+            "f[2 4]",
+            "2[3]",
+            "3[1]",
+            "4[5]",
+            "5[3]",
+        ]
+
+        lin_log = list(
+            map(lambda x: ChangeLogEntry.from_head_log_text(x), EXAMPLE_C))
+        hier_log = linear_log_to_hierarchy_log(lin_log)
+
+        buckets = list(map(
+            lambda x: BucketEntry.from_change_log_entry(x),
+            hier_log,
+        ))
+
+        self.assertEqual(buckets[0].merge_sha, 'a')
+        self.assertListEqual(buckets[0].branch_shas, [])
+        self.assertListEqual(buckets[0].children_shas, ['f'])
+
+        self.assertEqual(buckets[0].children[0].merge_sha, 'f')
+        self.assertListEqual(
+            buckets[0].children[0].branch_shas,
+            ['2', '3', '4', '5'],
+        )
+        self.assertListEqual(buckets[0].children[0].children_shas, [])
+
+        self.assertEqual(buckets[1].merge_sha, 'b')
+        self.assertListEqual(buckets[1].branch_shas, ['c'])
+        self.assertListEqual(buckets[1].children_shas, [])
+
+        self.assertEqual(buckets[2].merge_sha, 'd')
+        self.assertListEqual(buckets[2].branch_shas, [])
+        self.assertListEqual(buckets[2].children_shas, [])
+
+        self.assertEqual(buckets[3].merge_sha, 'e')
+        self.assertListEqual(buckets[3].branch_shas, [])
+        self.assertListEqual(buckets[3].children_shas, [])
+
+        self.assertEqual(buckets[4].merge_sha, '1')
+        self.assertListEqual(buckets[4].branch_shas, [])
+        self.assertListEqual(buckets[4].children_shas, [])
+
+    def test_simpler_version(self):
+        # a
+        # | \
+        # |  \
+        # b   f
+        # |\  |
+        # | c 2
+        # |/  |
+        # d   |
+        # |   |
+        # e   3
+        # |  /
+        # |/
+        # 1
+
+        EXAMPLE_C = [
+            "a[b f]",
+            "b[d c]",
+            "d[e]",
+            "c[d]",
+            "e[1]",
+            "1[]",
+            "f[2]",
+            "2[3]",
+            "3[1]",
+        ]
+
+        lin_log = list(
+            map(lambda x: ChangeLogEntry.from_head_log_text(x), EXAMPLE_C))
+        hier_log = linear_log_to_hierarchy_log(lin_log)
+
+        buckets = list(map(
+            lambda x: BucketEntry.from_change_log_entry(x),
+            hier_log,
+        ))
+
+        self.assertEqual(buckets[0].merge_sha, 'a')
+        self.assertListEqual(buckets[0].branch_shas, ['f', '2', '3'])
+        self.assertListEqual(buckets[0].children_shas, [])
+
+        self.assertEqual(buckets[1].merge_sha, 'b')
+        self.assertListEqual(buckets[1].branch_shas, ['c'])
+        self.assertListEqual(buckets[1].children_shas, [])
+
+        self.assertEqual(buckets[2].merge_sha, 'd')
+        self.assertListEqual(buckets[2].branch_shas, [])
+        self.assertListEqual(buckets[2].children_shas, [])
+
+        self.assertEqual(buckets[3].merge_sha, 'e')
+        self.assertListEqual(buckets[3].branch_shas, [])
+        self.assertListEqual(buckets[3].children_shas, [])
+
+        self.assertEqual(buckets[4].merge_sha, '1')
+        self.assertListEqual(buckets[4].branch_shas, [])
+        self.assertListEqual(buckets[4].children_shas, [])
