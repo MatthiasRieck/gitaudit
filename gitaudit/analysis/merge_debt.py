@@ -140,26 +140,31 @@ class BucketEntry(BaseModel):
         return [BucketEntry.from_change_log_entry(x) for x in hier_log]
 
 
-def get_sha_to_bucket_map(buckets: List[BucketEntry]):
-    """Generate a sha -> BucketEntry map out of a list of bucket entries
+def get_sha_to_bucket_entry_map(buckets: List[BucketEntry]):
+    """Generate a sha -> BucketEntry and Entry map out of a list of bucket entries
 
     Args:
         buckets (List[BucketEntry]): List of Bucket Entries
 
     Returns:
-        Dict[str, BucketEntry]: Bucket Map
+        Tuple[Dict[str, BucketEntry], Dict[str, BucketEntry]]: Bucket Map, Entry Map
     """
     bucket_map = {}
+    entry_map = {}
 
     for bucket in buckets:
-        bucket_map[bucket.merge_sha] = bucket
-        for branch_sha in bucket.branch_shas:
-            bucket_map[branch_sha] = bucket
+        bucket_map[bucket.merge_commit.sha] = bucket
+        entry_map[bucket.merge_commit.sha] = bucket.merge_commit
+        for branch_commit in bucket.branch_commits:
+            bucket_map[branch_commit.sha] = bucket
+            entry_map[branch_commit.sha] = branch_commit
 
-        child_map = get_sha_to_bucket_map(bucket.children)
-        bucket_map.update(child_map)
+        child_bucket_map, child_entry_map = get_sha_to_bucket_entry_map(
+            bucket.children)
+        bucket_map.update(child_bucket_map)
+        entry_map.update(child_entry_map)
 
-    return bucket_map
+    return bucket_map, entry_map
 
 
 def get_linear_bucket_list(buckets: List[BucketEntry]):

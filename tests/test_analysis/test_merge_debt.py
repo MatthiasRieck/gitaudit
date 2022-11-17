@@ -5,7 +5,7 @@ from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log
 from gitaudit.analysis.merge_debt import \
     get_head_base_hier_logs,\
     BucketEntry,\
-    get_sha_to_bucket_map,\
+    get_sha_to_bucket_entry_map,\
     get_linear_bucket_list
 
 MAIN_JSON_LOG = [
@@ -233,10 +233,18 @@ class TestBucketConversions(TestCase):
         hier_log = linear_log_to_hierarchy_log(lin_log)
         buckets = BucketEntry.list_from_change_log_list(hier_log)
 
+        bucket_map, entry_map = get_sha_to_bucket_entry_map(buckets)
+
         self.assertListEqual(
-            sorted(list(get_sha_to_bucket_map(buckets))),
+            sorted(list(bucket_map)),
             ['1', '2', '3', 'a', 'b', 'c', 'd', 'e', 'f'],
         )
+        self.assertListEqual(
+            sorted(list(entry_map)),
+            ['1', '2', '3', 'a', 'b', 'c', 'd', 'e', 'f'],
+        )
+        for sha, entry in entry_map.items():
+            self.assertEqual(sha, entry.sha)
         self.assertListEqual(
             sorted(list(map(lambda x: x.merge_sha, get_linear_bucket_list(buckets)))),
             ['1', 'a', 'b', 'd', 'e'],
@@ -276,10 +284,18 @@ class TestBucketConversions(TestCase):
         hier_log = linear_log_to_hierarchy_log(lin_log)
         buckets = BucketEntry.list_from_change_log_list(hier_log)
 
+        bucket_map, entry_map = get_sha_to_bucket_entry_map(buckets)
+
         self.assertListEqual(
-            sorted(list(get_sha_to_bucket_map(buckets))),
+            sorted(list(bucket_map)),
             ['1', '2', '3', '4', '5', 'a', 'b', 'c', 'd', 'e', 'f'],
         )
+        self.assertListEqual(
+            sorted(list(entry_map)),
+            ['1', '2', '3', '4', '5', 'a', 'b', 'c', 'd', 'e', 'f'],
+        )
+        for sha, entry in entry_map.items():
+            self.assertEqual(sha, entry.sha)
         self.assertListEqual(
             sorted(list(map(lambda x: x.merge_sha, get_linear_bucket_list(buckets)))),
             ['1', 'a', 'b', 'd', 'e', 'f'],
