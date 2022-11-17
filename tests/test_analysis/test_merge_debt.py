@@ -2,7 +2,11 @@ from unittest import TestCase
 
 from gitaudit.git.change_log_entry import ChangeLogEntry
 from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log
-from gitaudit.analysis.merge_debt import get_head_base_hier_logs, BucketEntry
+from gitaudit.analysis.merge_debt import \
+    get_head_base_hier_logs,\
+    BucketEntry,\
+    get_sha_to_bucket_map,\
+    get_linear_bucket_list
 
 MAIN_JSON_LOG = [
     {
@@ -114,11 +118,7 @@ class TestBucketEntry(TestCase):
         lin_log = list(
             map(lambda x: ChangeLogEntry.from_head_log_text(x), EXAMPLE_C))
         hier_log = linear_log_to_hierarchy_log(lin_log)
-
-        buckets = list(map(
-            lambda x: BucketEntry.from_change_log_entry(x),
-            hier_log,
-        ))
+        buckets = BucketEntry.list_from_change_log_list(hier_log)
 
         self.assertEqual(buckets[0].merge_sha, 'a')
         self.assertListEqual(buckets[0].branch_shas, [])
@@ -177,11 +177,7 @@ class TestBucketEntry(TestCase):
         lin_log = list(
             map(lambda x: ChangeLogEntry.from_head_log_text(x), EXAMPLE_C))
         hier_log = linear_log_to_hierarchy_log(lin_log)
-
-        buckets = list(map(
-            lambda x: BucketEntry.from_change_log_entry(x),
-            hier_log,
-        ))
+        buckets = BucketEntry.list_from_change_log_list(hier_log)
 
         self.assertEqual(buckets[0].merge_sha, 'a')
         self.assertListEqual(buckets[0].branch_shas, ['f', '2', '3'])
@@ -202,3 +198,89 @@ class TestBucketEntry(TestCase):
         self.assertEqual(buckets[4].merge_sha, '1')
         self.assertListEqual(buckets[4].branch_shas, [])
         self.assertListEqual(buckets[4].children_shas, [])
+
+
+class TestBucketConversions(TestCase):
+    def test_simple(self):
+        # a
+        # | \
+        # |  \
+        # b   f
+        # |\  |
+        # | c 2
+        # |/  |
+        # d   |
+        # |   |
+        # e   3
+        # |  /
+        # |/
+        # 1
+
+        EXAMPLE_C = [
+            "a[b f]",
+            "b[d c]",
+            "d[e]",
+            "c[d]",
+            "e[1]",
+            "1[]",
+            "f[2]",
+            "2[3]",
+            "3[1]",
+        ]
+
+        lin_log = list(
+            map(lambda x: ChangeLogEntry.from_head_log_text(x), EXAMPLE_C))
+        hier_log = linear_log_to_hierarchy_log(lin_log)
+        buckets = BucketEntry.list_from_change_log_list(hier_log)
+
+        self.assertListEqual(
+            sorted(list(get_sha_to_bucket_map(buckets))),
+            ['1', '2', '3', 'a', 'b', 'c', 'd', 'e', 'f'],
+        )
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_sha, get_linear_bucket_list(buckets)))),
+            ['1', 'a', 'b', 'd', 'e'],
+        )
+
+    def test_branched_version(self):
+        # a
+        # | \
+        # |  \
+        # b   f
+        # |\  |\
+        # | c 2 4
+        # |/  | |
+        # d   | 5
+        # |   |/
+        # e   3
+        # |  /
+        # |/
+        # 1
+
+        EXAMPLE_C = [
+            "a[b f]",
+            "b[d c]",
+            "d[e]",
+            "c[d]",
+            "e[1]",
+            "1[]",
+            "f[2 4]",
+            "2[3]",
+            "3[1]",
+            "4[5]",
+            "5[3]",
+        ]
+
+        lin_log = list(
+            map(lambda x: ChangeLogEntry.from_head_log_text(x), EXAMPLE_C))
+        hier_log = linear_log_to_hierarchy_log(lin_log)
+        buckets = BucketEntry.list_from_change_log_list(hier_log)
+
+        self.assertListEqual(
+            sorted(list(get_sha_to_bucket_map(buckets))),
+            ['1', '2', '3', '4', '5', 'a', 'b', 'c', 'd', 'e', 'f'],
+        )
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_sha, get_linear_bucket_list(buckets)))),
+            ['1', 'a', 'b', 'd', 'e', 'f'],
+        )

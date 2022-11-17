@@ -126,3 +126,55 @@ class BucketEntry(BaseModel):
             branch_commits=branch_commits,
             children=children
         )
+
+    @classmethod
+    def list_from_change_log_list(cls, hier_log):
+        """Given an hierarchy log create a list of BucketEntries
+
+        Args:
+            hier_log (List[ChangeLogEntry]): Hierarchy Log
+
+        Returns:
+            List[BucketEntry]: List of Bucket Entries
+        """
+        return [BucketEntry.from_change_log_entry(x) for x in hier_log]
+
+
+def get_sha_to_bucket_map(buckets: List[BucketEntry]):
+    """Generate a sha -> BucketEntry map out of a list of bucket entries
+
+    Args:
+        buckets (List[BucketEntry]): List of Bucket Entries
+
+    Returns:
+        Dict[str, BucketEntry]: Bucket Map
+    """
+    bucket_map = {}
+
+    for bucket in buckets:
+        bucket_map[bucket.merge_sha] = bucket
+        for branch_sha in bucket.branch_shas:
+            bucket_map[branch_sha] = bucket
+
+        child_map = get_sha_to_bucket_map(bucket.children)
+        bucket_map.update(child_map)
+
+    return bucket_map
+
+
+def get_linear_bucket_list(buckets: List[BucketEntry]):
+    """Generate a linear list of all bucket entries
+
+    Args:
+        buckets (List[BucketEntry]): List of buckets ordered in hierarchy
+
+    Returns:
+        List[BucketEntry]: The linear list of bucket entries
+    """
+    bucket_list = []
+
+    for bucket in buckets:
+        bucket_list.append(bucket)
+        bucket_list.extend(get_linear_bucket_list(bucket.children))
+
+    return bucket_list
