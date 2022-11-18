@@ -7,7 +7,7 @@ from typing import List
 from pydantic import BaseModel
 
 from gitaudit.git.change_log_entry import ChangeLogEntry
-from .merge_debt import BucketEntry, get_sha_to_bucket_entry_map
+from .buckets import BucketEntry, get_sha_to_bucket_entry_map
 
 
 class MatchConfidence(Enum):
