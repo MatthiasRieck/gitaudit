@@ -2,7 +2,7 @@
 """
 
 from __future__ import annotations
-from typing import List
+from typing import List, Tuple, Dict
 
 from pydantic import BaseModel, Field
 
@@ -120,14 +120,15 @@ class BucketEntry(BaseModel):
         return [BucketEntry.from_change_log_entry(x) for x in hier_log]
 
 
-def get_sha_to_bucket_entry_map(buckets: List[BucketEntry]):
+def get_sha_to_bucket_entry_map(buckets: List[BucketEntry]) \
+        -> Tuple[Dict[str, BucketEntry], Dict[str, ChangeLogEntry]]:
     """Generate a sha -> BucketEntry and Entry map out of a list of bucket entries
 
     Args:
         buckets (List[BucketEntry]): List of Bucket Entries
 
     Returns:
-        Tuple[Dict[str, BucketEntry], Dict[str, BucketEntry]]: Bucket Map, Entry Map
+        Tuple[Dict[str, BucketEntry], Dict[str, ChangeLogEntry]]: Bucket Map, Entry Map
     """
     bucket_map = {}
     entry_map = {}

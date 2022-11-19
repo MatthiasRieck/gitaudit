@@ -3,7 +3,10 @@ from gitaudit.git.change_log_entry import ChangeLogEntry
 from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log
 from gitaudit.analysis.merge_debt.merge_debt import MergeDebt
 
-from gitaudit.analysis.merge_debt.matchers import SameCommitMatcher
+from gitaudit.analysis.merge_debt.matchers import SameCommitMatcher, \
+    DirectCherryPickMatcher, ThirdPartyCherryPickMatcher
+
+from .test_merge_debt_matchers.test_case_cherry_picked import CHERRY_PICK_MAIN_LOG, CHERRY_PICK_DEV_LOG
 
 # main dev
 #  |    |
@@ -107,4 +110,119 @@ class TestMergeDebt(TestCase):
             sorted(list(map(lambda x: x.merge_commit.sha,
                    merge_debt.base_buckets.entries))),
             ['d05', 'f07'],
+        )
+
+    def test_direct_cherry_picked_both_ways(self):
+        main_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(CHERRY_PICK_MAIN_LOG),
+        )
+        dev_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(CHERRY_PICK_DEV_LOG),
+        )
+
+        merge_debt = MergeDebt(dev_log, main_log)
+        merge_debt.execute_matcher(DirectCherryPickMatcher())
+
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.head_buckets.entries))),
+            ['216', '3ac'],
+        )
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.base_buckets.entries))),
+            ['48b', 'fd1'],
+        )
+
+    def test_direct_cherry_picked_head_to_base(self):
+        main_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(CHERRY_PICK_MAIN_LOG),
+        )
+        dev_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(CHERRY_PICK_DEV_LOG),
+        )
+
+        merge_debt = MergeDebt(dev_log, main_log)
+        merge_debt.execute_matcher(DirectCherryPickMatcher(
+            head_to_base=True, base_to_head=False))
+
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.head_buckets.entries))),
+            sorted(['216', '3ac', "562", "6b6", "4bf"]),
+        )
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.base_buckets.entries))),
+            sorted(['48b', 'fd1', "9db", "ad0", "8d0"]),
+        )
+
+    def test_direct_cherry_picked_base_to_head(self):
+        main_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(CHERRY_PICK_MAIN_LOG),
+        )
+        dev_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(CHERRY_PICK_DEV_LOG),
+        )
+
+        merge_debt = MergeDebt(dev_log, main_log)
+        merge_debt.execute_matcher(DirectCherryPickMatcher(
+            head_to_base=False, base_to_head=True))
+
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.head_buckets.entries))),
+            sorted(['216', '3ac', "8bb", "4c2", "9fb"]),
+        )
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.base_buckets.entries))),
+            sorted(['48b', 'fd1', "d91", "99f", "a34"]),
+        )
+
+    def test_third_party_cherry_pick(self):
+        main_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(CHERRY_PICK_MAIN_LOG),
+        )
+        dev_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(CHERRY_PICK_DEV_LOG),
+        )
+
+        merge_debt = MergeDebt(dev_log, main_log)
+        merge_debt.execute_matcher(ThirdPartyCherryPickMatcher())
+
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.head_buckets.entries))),
+            sorted(['3ac', "8bb", "4c2", "9fb", "562", "6b6", "4bf"]),
+        )
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.base_buckets.entries))),
+            sorted(['48b', "d91", "99f", "a34", "9db", "ad0", "8d0"]),
+        )
+
+    def test_multiple_matchers(self):
+        main_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(CHERRY_PICK_MAIN_LOG),
+        )
+        dev_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(CHERRY_PICK_DEV_LOG),
+        )
+
+        merge_debt = MergeDebt(dev_log, main_log)
+        merge_debt.execute_matchers([
+            DirectCherryPickMatcher(),
+            ThirdPartyCherryPickMatcher(),
+        ])
+
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.head_buckets.entries))),
+            sorted(['3ac']),
+        )
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.base_buckets.entries))),
+            sorted(['48b']),
         )
