@@ -3,6 +3,7 @@
 
 from enum import Enum
 from typing import List
+from hashlib import sha1
 
 from pydantic import BaseModel
 
@@ -196,7 +197,59 @@ class ThirdPartyCherryPickMatcher(Matcher):  # pylint: disable=too-few-public-me
         return matches
 
 
-class ChangedFilesMatcher(Matcher):  # pylint: disable=too-few-public-methods
+def numstat_to_sha1(entry: ChangeLogEntry, with_additions_deletions=True):
+    """Calculates a sha1 hash out of the numstat file changes
+
+    Args:
+        entry (ChangeLogEntry): Change Log Entry
+        with_additions_deletions (bool, optional): Whether additions and deletions shall be
+            accounted for. Defaults to True.
+
+    Returns:
+        str: sha1 hash
+    """
+    if with_additions_deletions:
+        file_add_del_texts = map(
+            lambda x: f"{x.path}({x.additions}|{x.deletions})", entry.sorted_numstat)
+    else:
+        file_add_del_texts = map(lambda x: x.path, entry.sorted_numstat)
+    return sha1("".join(file_add_del_texts).encode('utf-8')).hexdigest()
+
+
+def create_numstat_map(entries: List[ChangeLogEntry], with_additions_deletions: bool = True):
+    """Creates a numstat sha1 to change log entry map that can be used for commit matching
+
+    Args:
+        entries (List[ChangeLogEntry]): List of change log entries
+        with_additions_deletions (bool, optional): Whether additions / deletions shall be accounted
+            for in the map generation. Defaults to True.
+
+    Returns:
+        Dict[str, ChangeLogEntry]: Numstat sha1 to ChangeLogEntry map
+    """
+    numstat_map = {}
+    ignore_entries = []
+
+    for entry in entries:
+        if not entry.numstat:
+            continue
+
+        stat_sha1 = numstat_to_sha1(entry, with_additions_deletions)
+
+        if stat_sha1 in ignore_entries:
+            continue
+
+        if stat_sha1 in numstat_map:
+            numstat_map.pop(stat_sha1)
+            ignore_entries.append(stat_sha1)
+            continue
+
+        numstat_map[stat_sha1] = entry
+
+    return numstat_map
+
+
+class FilesChangedMatcher(Matcher):  # pylint: disable=too-few-public-methods
     """In case a cherry pick was NOT done with the -x option enabled an exact matching is not
     possible. But if a cherry pick was done successfully, the files changed in both commits shall
     be the exact same. Therefore, the changes files withing a commit can be used to determine
@@ -207,6 +260,10 @@ class ChangedFilesMatcher(Matcher):  # pylint: disable=too-few-public-methods
     done for all matches automatically to proove confidence). In case the additions and deletions
     are not matched the confidence level is dropped to LOW.
     """
+
+    def __init__(self, with_additions_deletions=True) -> None:
+        super().__init__()
+        self.with_additions_deletions = with_additions_deletions
 
     def match(self, head: List[BucketEntry], base: List[BucketEntry]) -> List[MatchResult]:
         """Match the bucket entries
@@ -221,6 +278,35 @@ class ChangedFilesMatcher(Matcher):  # pylint: disable=too-few-public-methods
         Returns:
             List[MatchResult]: List of commit Matches
         """
+
+        _, entry_head_map = get_sha_to_bucket_entry_map(head)
+        _, entry_base_map = get_sha_to_bucket_entry_map(base)
+
+        numstat_head_map = create_numstat_map(
+            list(entry_head_map.values()),
+            self.with_additions_deletions,
+        )
+        numstat_base_map = create_numstat_map(
+            list(entry_base_map.values()),
+            self.with_additions_deletions,
+        )
+
+        matches = []
+
+        confidence = MatchConfidence.STRONG \
+            if self.with_additions_deletions else MatchConfidence.GOOD
+
+        for cp_sha, head_entry in numstat_head_map.items():
+            if cp_sha not in numstat_base_map:
+                continue
+
+            matches.append(MatchResult(
+                head=head_entry,
+                base=numstat_base_map[cp_sha],
+                confidence=confidence,
+            ))
+
+        return matches
 
 
 class WhitelistMatcher(Matcher):  # pylint: disable=too-few-public-methods
