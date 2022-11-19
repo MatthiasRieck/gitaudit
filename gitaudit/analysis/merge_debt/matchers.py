@@ -92,6 +92,18 @@ class DirectCherryPickMatcher(Matcher):  # pylint: disable=too-few-public-method
     All matches will have an ABSOLUTE confidence level.
     """
 
+    def __init__(self, head_to_base: bool = True, base_to_head: bool = True) -> None:
+        """Constructor
+
+        Args:
+            head_to_base (bool): Head commit was cherry picked with -x from base
+            base_to_head (bool): Base commit was cherry picked with -x from head
+        """
+        super().__init__()
+
+        self.head_to_base = head_to_base
+        self.base_to_head = base_to_head
+
     def match(self, head: List[BucketEntry], base: List[BucketEntry]) -> List[MatchResult]:
         """Match the bucket entries
 
@@ -105,6 +117,37 @@ class DirectCherryPickMatcher(Matcher):  # pylint: disable=too-few-public-method
         Returns:
             List[MatchResult]: List of commit Matches
         """
+
+        _, entry_head_map = get_sha_to_bucket_entry_map(head)
+        _, entry_base_map = get_sha_to_bucket_entry_map(base)
+
+        matches = []
+
+        if self.head_to_base:
+            for head_entry in entry_head_map.values():
+                if not head_entry.cherry_pick_sha:
+                    continue
+
+                if head_entry.cherry_pick_sha in entry_base_map:
+                    matches.append(MatchResult(
+                        head=head_entry,
+                        base=entry_base_map[head_entry.cherry_pick_sha],
+                        confidence=MatchConfidence.ABSOLUTE,
+                    ))
+
+        if self.base_to_head:
+            for base_entry in entry_base_map.values():
+                if not base_entry.cherry_pick_sha:
+                    continue
+
+                if base_entry.cherry_pick_sha in entry_head_map:
+                    matches.append(MatchResult(
+                        head=entry_head_map[base_entry.cherry_pick_sha],
+                        base=base_entry,
+                        confidence=MatchConfidence.ABSOLUTE,
+                    ))
+
+        return matches
 
 
 class ThirdPartyCherryPickMatcher(Matcher):  # pylint: disable=too-few-public-methods
@@ -129,6 +172,28 @@ class ThirdPartyCherryPickMatcher(Matcher):  # pylint: disable=too-few-public-me
         Returns:
             List[MatchResult]: List of commit Matches
         """
+
+        _, entry_head_map = get_sha_to_bucket_entry_map(head)
+        _, entry_base_map = get_sha_to_bucket_entry_map(base)
+
+        matches = []
+
+        cherry_picked_from_head_map = {x.cherry_pick_sha: x for x in filter(
+            lambda entry: entry.cherry_pick_sha, entry_head_map.values())}
+        cherry_picked_from_base_map = {x.cherry_pick_sha: x for x in filter(
+            lambda entry: entry.cherry_pick_sha, entry_base_map.values())}
+
+        for cp_sha, head_entry in cherry_picked_from_head_map.items():
+            if cp_sha not in cherry_picked_from_base_map:
+                continue
+
+            matches.append(MatchResult(
+                head=head_entry,
+                base=cherry_picked_from_base_map[cp_sha],
+                confidence=MatchConfidence.ABSOLUTE,
+            ))
+
+        return matches
 
 
 class ChangedFilesMatcher(Matcher):  # pylint: disable=too-few-public-methods
