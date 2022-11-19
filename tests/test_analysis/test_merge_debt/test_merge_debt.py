@@ -2,8 +2,8 @@ from unittest import TestCase
 
 from gitaudit.git.change_log_entry import ChangeLogEntry
 from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log
-from gitaudit.analysis.merge_debt import \
-    get_head_base_hier_logs,\
+from gitaudit.analysis.merge_debt.merge_debt import get_head_base_hier_logs
+from gitaudit.analysis.merge_debt.buckets import \
     BucketEntry,\
     get_sha_to_bucket_entry_map,\
     get_linear_bucket_list

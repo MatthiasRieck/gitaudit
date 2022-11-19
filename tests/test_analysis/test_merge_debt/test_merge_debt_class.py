@@ -1,9 +1,9 @@
 from unittest import TestCase
 from gitaudit.git.change_log_entry import ChangeLogEntry
 from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log
-from gitaudit.analysis.merge_debt import BucketEntry
+from gitaudit.analysis.merge_debt.merge_debt import MergeDebt
 
-from gitaudit.analysis.merge_debt_matchers import SameCommitMatcher, MatchConfidence
+from gitaudit.analysis.merge_debt.matchers import SameCommitMatcher
 
 # main dev
 #  |    |
@@ -86,24 +86,25 @@ MAIN_LOG = [_ffc, _a39, _a21, _b8b, _eae, _a6c, _f07, _d05, _cfd, _cf7]
 DEV_LOG = [_f53, _b8b, _eae, _a6c, _cfd, _a21, _cf7]
 
 
-class TestSameCommitMatcher(TestCase):
-    def test_branched_version(self):
-        main_buckets = BucketEntry.list_from_change_log_list(linear_log_to_hierarchy_log(
+class TestMergeDebt(TestCase):
+    def test_same_shas(self):
+        main_log = linear_log_to_hierarchy_log(
             ChangeLogEntry.list_from_objects(MAIN_LOG),
-        ))
-
-        dev_buckets = BucketEntry.list_from_change_log_list(linear_log_to_hierarchy_log(
+        )
+        dev_log = linear_log_to_hierarchy_log(
             ChangeLogEntry.list_from_objects(DEV_LOG),
-        ))
+        )
 
-        matcher = SameCommitMatcher()
-        matches = matcher.match(dev_buckets, main_buckets)
+        merge_debt = MergeDebt(dev_log, main_log)
 
-        for match in matches:
-            self.assertEqual(match.confidence, MatchConfidence.ABSOLUTE)
-            self.assertEqual(match.head.sha, match.base.sha)
+        merge_debt.execute_matcher(SameCommitMatcher())
 
         self.assertListEqual(
-            sorted(list(map(lambda x: x.head.sha, matches))),
-            ['a21', 'a6c', 'b8b', 'cf7', 'cfd', 'eae'],
+            merge_debt.head_buckets.entries,
+            [],
+        )
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.base_buckets.entries))),
+            ['d05', 'f07'],
         )

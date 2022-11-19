@@ -1,56 +1,12 @@
-"""This code helps identifying missing merges
-in main that have already been merged in a
-release branch
+"""Storing Contribution Information as Buckets
 """
+
 from __future__ import annotations
 from typing import List
 
 from pydantic import BaseModel, Field
 
-from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log, changelog_hydration
-from gitaudit.git.controller import Git
-from gitaudit.branch.tree import Tree
-
 from gitaudit.git.change_log_entry import ChangeLogEntry
-
-
-def get_head_base_hier_logs(git: Git, head_ref: str, base_ref: str):
-    """Gets the head and base hierarchy logs from a git instance
-    as preparation for the merge debt analysis
-
-    Args:
-        git (Git): Git instance
-        head_ref (str): name of the head ref
-        base_ref (str): name of the base ref
-
-    Returns:
-        Tuple[List[ChangeLogEntry], List[ChangeLogEntry]]: head and base
-            hierarchy log
-    """
-    head_hier_log = linear_log_to_hierarchy_log(git.log_parentlog(head_ref))
-    base_hier_log = linear_log_to_hierarchy_log(git.log_parentlog(base_ref))
-
-    tree = Tree()
-    tree.append_log(base_hier_log, base_ref)
-    tree.append_log(head_hier_log, head_ref)
-
-    ref_segment_map = {
-        x.branch_name: x for x in tree.root.children.values()
-    }
-
-    head_segment = ref_segment_map[head_ref]
-    base_segment = ref_segment_map[base_ref]
-
-    head_hier_log = changelog_hydration(
-        head_segment.entries,
-        git,
-    )
-    base_hier_log = changelog_hydration(
-        base_segment.entries,
-        git,
-    )
-
-    return head_hier_log, base_hier_log
 
 
 class BucketEntry(BaseModel):
@@ -79,6 +35,30 @@ class BucketEntry(BaseModel):
         buckets with a substructure
         """
         return list(map(lambda x: x.merge_commit.sha, self.children))
+
+    def prune_sha(self, sha: str) -> bool:
+        """Prune a commit from the bucket entry
+
+        Args:
+            sha (str): The sha of the commit to be pruned
+
+        Returns:
+            bool: Indicator whether or not the bucket entry is now empty and pruning can
+                be collapsed upwards the bucket entry tree
+        """
+        self.branch_commits = list(filter(
+            lambda x: x.sha != sha,
+            self.branch_commits,
+        ))
+        self.children = list(filter(
+            lambda x: x.merge_sha != sha,
+            self.children,
+        ))
+
+        if self.merge_sha == sha:
+            return True
+
+        return not self.branch_commits and not self.children
 
     @classmethod
     def from_change_log_entry(
@@ -183,3 +163,84 @@ def get_linear_bucket_list(buckets: List[BucketEntry]):
         bucket_list.extend(get_linear_bucket_list(bucket.children))
 
     return bucket_list
+
+
+def get_merge_sha_parent_bucket_map(buckets: List[BucketEntry]):
+    """Return the parent bucket for any merge commit sha
+
+    Args:
+        buckets (List[BucketEntry]): buckets in hierarchy
+
+    Returns:
+        Dict[str, BucketEntry]: Merge sha to parent bucket map
+    """
+    parent_map = {}
+
+    for bucket in buckets:
+        for child in bucket.children:
+            parent_map[child.merge_sha] = bucket
+
+        child_parent_map = get_merge_sha_parent_bucket_map(bucket.children)
+        parent_map.update(child_parent_map)
+
+    return parent_map
+
+
+class BucketList:
+    """Stores a list of bucket entries in its hierarchy
+    """
+
+    def __init__(self, hier_log) -> None:
+        self.entries = BucketEntry.list_from_change_log_list(hier_log)
+        self.bucket_map, self.entry_map = get_sha_to_bucket_entry_map(
+            self.entries)
+        self.linear_buckets = get_linear_bucket_list(self.entries)
+        self.merge_sha_parent_bucket_map = get_merge_sha_parent_bucket_map(
+            self.entries)
+        self.merge_commit_shas = list(
+            map(lambda x: x.merge_sha, self.linear_buckets))
+
+    def prune_sha(self, sha):
+        """Pune a sha from the bucket list
+
+        Args:
+            sha (str): Sha of the commit to be pruned
+        """
+        bucket = self.bucket_map.get(sha, None)
+
+        if not bucket:
+            return
+
+        collapse = bucket.prune_sha(sha)
+
+        if collapse:
+            self._prune_upwards_from_bucket(bucket)
+
+    def _prune_upwards_from_bucket(self, bucket):
+        parent_bucket = self.merge_sha_parent_bucket_map.get(
+            bucket.merge_sha, None)
+
+        if parent_bucket:
+            collapse = parent_bucket.prune_sha(bucket.merge_sha)
+            if collapse:
+                self._prune_upwards_from_bucket(parent_bucket)
+        else:
+            self.entries = list(
+                filter(lambda x: x.merge_sha != bucket.merge_sha, self.entries))
+
+    def prune_sha_merge_last(self, shas):
+        """prunes multiples shas by pruning the branch entries before the merge commits
+
+        Args:
+            shas (List[str]): shas to be pruned from the list
+        """
+        merge_shas = []
+
+        for sha in shas:
+            if sha in self.merge_commit_shas:
+                merge_shas.append(sha)
+            else:
+                self.prune_sha(sha)
+
+        for sha in merge_shas:
+            self.prune_sha(sha)
