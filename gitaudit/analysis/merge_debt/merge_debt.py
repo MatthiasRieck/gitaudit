@@ -9,8 +9,9 @@ from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log, changelog_hyd
 from gitaudit.git.controller import Git
 from gitaudit.branch.tree import Tree
 
-from .matchers import Matcher
+from .matchers import Matcher, MatchConfidence, MatchResult
 from .buckets import BucketList
+from .report import MergeDebtReport, MergeDebtReportEntry
 
 
 def get_head_base_hier_logs(git: Git, head_ref: str, base_ref: str):
@@ -56,14 +57,20 @@ class MergeDebt:
     """Calculates the merge debt by finding commits that are merged in head but not in base
     """
 
-    def __init__(self, head_hier_log, base_hier_log) -> None:
+    def __init__(self, head_hier_log, base_hier_log, prunable_confidences=None) -> None:
         self.head_hier_log = head_hier_log
         self.base_hier_log = base_hier_log
+
+        self.prunable_confidences = prunable_confidences if prunable_confidences else [
+            MatchConfidence.ABSOLUTE,
+            MatchConfidence.STRONG,
+        ]
 
         self.head_buckets = BucketList(self.head_hier_log)
         self.base_buckets = BucketList(self.base_hier_log)
 
         self.matches = []
+        self.report = MergeDebtReport()
 
     def ignore_shas(self, head_shas, base_shas=None):
         """Ability to set shas to be ignored for head and base. These are pruned and no longer
@@ -94,6 +101,29 @@ class MergeDebt:
         """
         self.base_buckets.prune_sha(sha)
 
+    def validate_match(self, match: MatchResult):
+        """Validate Match Result
+
+        Args:
+            match (MatchResult): Macth Result
+
+        Returns:
+            MatchResult: Augmented Match Result
+        """
+        if match.head.sorted_numstat != match.base.sorted_numstat:
+            if match.confidence in self.prunable_confidences:
+                self.report.append_entry(MergeDebtReportEntry.warning(
+                    match,
+                    "Files changes / numstats do not match!",
+                ))
+            else:
+                self.report.append_entry(MergeDebtReportEntry.info(
+                    match,
+                    "Files changes / numstats do not match!",
+                ))
+
+        return match
+
     def execute_matcher(self, matcher: Matcher, prune=True):
         """Executes a matcher
 
@@ -105,14 +135,17 @@ class MergeDebt:
         sub_matches = matcher.match(
             self.head_buckets.entries, self.base_buckets.entries)
 
-        self.matches.extend(sub_matches)
-
         if not prune:
             return
 
         for match in sub_matches:
-            self.prune_head_sha(match.head.sha)
-            self.prune_base_sha(match.base.sha)
+            match = self.validate_match(match)
+
+            if match.confidence in self.prunable_confidences:
+                self.prune_head_sha(match.head.sha)
+                self.prune_base_sha(match.base.sha)
+
+            self.matches.append(match)
 
     def execute_matchers(self, matchers: List[Matcher], prune=True):
         """Executed a list of matchers

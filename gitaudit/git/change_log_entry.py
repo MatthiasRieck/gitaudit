@@ -145,6 +145,15 @@ class ChangeLogEntry(BaseModel):
     submodule_updates: Optional[List[SubmoduleUpdate]] = Field(
         default_factory=list)
 
+    @property
+    def sorted_numstat(self):
+        """Path sorted File NumStat
+
+        Returns:
+            List[FileAdditionsDeletions]: Sorted numstat
+        """
+        return sorted(self.numstat, key=lambda x: x.path)
+
     def copy_without_hierarchy(self):
         """Copy Itself without hierarchy elements
         (branch_offs, other_parents)
