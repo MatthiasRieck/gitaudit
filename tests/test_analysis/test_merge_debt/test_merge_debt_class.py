@@ -6,7 +6,10 @@ from gitaudit.analysis.merge_debt.merge_debt import MergeDebt
 from gitaudit.analysis.merge_debt.matchers import SameCommitMatcher, \
     DirectCherryPickMatcher, ThirdPartyCherryPickMatcher
 
-from .test_merge_debt_matchers.test_case_cherry_picked import CHERRY_PICK_MAIN_LOG, CHERRY_PICK_DEV_LOG
+from .test_merge_debt_matchers.test_case_cherry_picked import \
+    CHERRY_PICK_MAIN_LOG, CHERRY_PICK_DEV_LOG
+from .test_merge_debt_matchers.test_case_cherry_picked_diff_numstat import \
+    CHERRY_PICK_DIFF_MAIN_LOG, CHERRY_PICK_DIFF_DEV_LOG
 
 # main dev
 #  |    |
@@ -225,4 +228,24 @@ class TestMergeDebt(TestCase):
             sorted(list(map(lambda x: x.merge_commit.sha,
                    merge_debt.base_buckets.entries))),
             sorted(['48b']),
+        )
+
+    def test_diff_numstat(self):
+        main_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(CHERRY_PICK_DIFF_MAIN_LOG),
+        )
+        dev_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(CHERRY_PICK_DIFF_DEV_LOG),
+        )
+
+        merge_debt = MergeDebt(dev_log, main_log)
+        merge_debt.execute_matcher(DirectCherryPickMatcher())
+
+        self.assertEqual(
+            merge_debt.report.entries[0].match.base.sha,
+            "a19",
+        )
+        self.assertEqual(
+            merge_debt.report.entries[0].match.head.sha,
+            "a6c",
         )
