@@ -59,7 +59,7 @@ class TestGit(TestCase):
     def test_fetch(self):
         self.append_process_return_text()
         Git('', '').fetch()
-        self.assert_git_called_with_args('fetch', '--tags', '--force')
+        self.assert_git_called_with_args('fetch', '--tags', '--force', '-q')
 
     def test_rev_parse(self):
         self.append_process_return_text(
