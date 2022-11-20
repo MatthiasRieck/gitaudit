@@ -12,6 +12,7 @@ from gitaudit.branch.tree import Tree
 from .matchers import Matcher, MatchConfidence, MatchResult
 from .buckets import BucketList
 from .report import MergeDebtReport, MergeDebtReportEntry
+from .pruners import Pruner
 
 
 def get_head_base_hier_logs(git: Git, head_ref: str, base_ref: str):
@@ -72,18 +73,18 @@ class MergeDebt:
         self.matches = []
         self.report = MergeDebtReport()
 
-    def ignore_shas(self, head_shas, base_shas=None):
-        """Ability to set shas to be ignored for head and base. These are pruned and no longer
-        part of the analysis.
-        """
-        for sha in head_shas:
-            self.prune_head_sha(sha)
+    # def ignore_shas(self, head_shas, base_shas=None):
+    #     """Ability to set shas to be ignored for head and base. These are pruned and no longer
+    #     part of the analysis.
+    #     """
+    #     for sha in head_shas:
+    #         self.prune_head_sha(sha)
 
-        if not base_shas:
-            base_shas = []
+    #     if not base_shas:
+    #         base_shas = []
 
-        for sha in base_shas:
-            self.prune_base_sha(sha)
+    #     for sha in base_shas:
+    #         self.prune_base_sha(sha)
 
     def prune_head_sha(self, sha):
         """Prunes a sha from the head bucket list
@@ -157,3 +158,19 @@ class MergeDebt:
         """
         for matcher in matchers:
             self.execute_matcher(matcher, prune)
+
+    def execute_pruner(self, pruner: Pruner):
+        """Prunes shas after running a provided pruner for selection
+
+        Args:
+            pruner (Pruner): The pruner to select the entries to be removed
+        """
+        head_prunes, base_prunes = pruner.prune(
+            self.head_buckets.entries,
+            self.base_buckets.entries,
+        )
+
+        for entry in head_prunes:
+            self.prune_head_sha(entry.sha)
+        for entry in base_prunes:
+            self.prune_base_sha(entry.sha)
