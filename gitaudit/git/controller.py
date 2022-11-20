@@ -91,7 +91,7 @@ class Git:
         Returns:
             str: git output of the fetch command
         """
-        return self._execute_git_cmd("fetch", "--tags", "--force")
+        return self._execute_git_cmd("fetch", "--tags", "--force", "-q")
 
     def rev_parse(self, *args: "list[str]"):
         """Execute rev parse. By default will execute "git rev-parse HEAD"
