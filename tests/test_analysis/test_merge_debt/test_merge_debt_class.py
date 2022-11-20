@@ -4,12 +4,14 @@ from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log
 from gitaudit.analysis.merge_debt.merge_debt import MergeDebt
 
 from gitaudit.analysis.merge_debt.matchers import SameCommitMatcher, \
-    DirectCherryPickMatcher, ThirdPartyCherryPickMatcher
+    DirectCherryPickMatcher, ThirdPartyCherryPickMatcher, FilesChangedMatcher, MatchConfidence
 
 from .test_merge_debt_matchers.test_case_cherry_picked import \
     CHERRY_PICK_MAIN_LOG, CHERRY_PICK_DEV_LOG
 from .test_merge_debt_matchers.test_case_cherry_picked_diff_numstat import \
     CHERRY_PICK_DIFF_MAIN_LOG, CHERRY_PICK_DIFF_DEV_LOG
+from .test_merge_debt_matchers.test_case_files_changed_matcher import \
+    FILES_CHANGED_MAIN_LOG, FILES_CHANGED_DEV_LOG
 
 # main dev
 #  |    |
@@ -248,4 +250,50 @@ class TestMergeDebt(TestCase):
         self.assertEqual(
             merge_debt.report.entries[0].match.head.sha,
             "a6c",
+        )
+
+    def test_files_changed_with_add_del(self):
+        main_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(FILES_CHANGED_MAIN_LOG),
+        )
+        dev_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(FILES_CHANGED_DEV_LOG),
+        )
+
+        merge_debt = MergeDebt(dev_log, main_log)
+        merge_debt.execute_matcher(FilesChangedMatcher())
+
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.head_buckets.entries))),
+            ['873', 'f65'],
+        )
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.base_buckets.entries))),
+            ['1e2', '657'],
+        )
+
+    def test_files_changed_without_add_del(self):
+        main_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(FILES_CHANGED_MAIN_LOG),
+        )
+        dev_log = linear_log_to_hierarchy_log(
+            ChangeLogEntry.list_from_objects(FILES_CHANGED_DEV_LOG),
+        )
+
+        merge_debt = MergeDebt(dev_log, main_log, prunable_confidences=[
+                               MatchConfidence.GOOD])
+        merge_debt.execute_matcher(
+            FilesChangedMatcher(with_additions_deletions=False))
+
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.head_buckets.entries))),
+            sorted(['873', '233']),
+        )
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.merge_commit.sha,
+                   merge_debt.base_buckets.entries))),
+            sorted(['9db', '657']),
         )
