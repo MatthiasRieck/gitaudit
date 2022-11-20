@@ -138,11 +138,9 @@ class Git:
 
         for remote in remotes:
             repl_text = f'{remote}/HEAD -> '
-            remote_branches = list(map(
-                lambda x: x.replace(
-                    repl_text, ''),  # pylint: disable=cell-var-from-loop
-                remote_branches,
-            ))
+            remote_branches = [
+                x.replace(repl_text, '') for x in remote_branches
+            ]
 
         return remote_branches
 
