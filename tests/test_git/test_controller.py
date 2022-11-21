@@ -2,6 +2,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from datetime import datetime
+from io import BytesIO
 
 from gitaudit.git.controller import Git
 from gitaudit.git.change_log_entry import ChangeLogEntry, FileAdditionsDeletions
@@ -18,6 +19,14 @@ class ProcessMock:
 
     def communicate(self):
         return self.return_data.pop(0)
+
+    @property
+    def stdout(self):
+        return BytesIO(self.return_data.pop(0)[0])
+
+    @property
+    def stderr(self):
+        return BytesIO("".encode('utf-8'))
 
 
 class TestGit(TestCase):
@@ -152,7 +161,7 @@ class TestGit(TestCase):
 
     def test_log_changelog(self):
         self.append_process_return_text(
-            "#CS#\n"+LOG_ENTRY_HEAD+"#CS#\n"+LOG_ENTRY_NO_PARENT
+            "#CS#\n"+LOG_ENTRY_HEAD+"\n#CS#\n"+LOG_ENTRY_NO_PARENT
         )
         changelog = Git('', '').log_changelog(end_ref='main')
 
