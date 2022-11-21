@@ -1,7 +1,9 @@
 """Class that communicated with local git installation."""
 
 import os
+from typing import List
 import subprocess
+import io
 from .change_log_entry import ChangeLogEntry
 
 
@@ -46,6 +48,41 @@ def exec_sub_process(args: "list[str]", verbose: "bool") -> "tuple(str, str)":
     return output
 
 
+def exec_sub_process_yield(args: List[str], verbose: bool) -> str:
+    """Executes Subprocess Popen call and stores the communication
+    and yields the output line by line
+
+    Args:
+        args (list[str]): arguments as list of strings
+        verbose (bool): whether the output shall be
+            printed to the console
+
+    Raises:
+        GitError: In case git returns an error output a GitError
+            is raised with the message
+
+    Returns:
+        str: Git output as text yielded line by line and decoded to utf-8 and stripped
+            from leading and trailing whitespace
+    """
+    process = subprocess.Popen(  # pylint: disable=consider-using-with
+        args=args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    # output, err = process.communicate()
+
+    for line in io.TextIOWrapper(process.stdout, encoding="utf-8"):
+        if verbose:
+            print(line)
+        yield line
+
+    err = process.stderr.read()
+
+    if err:
+        raise GitError(err)
+
+
 class Git:
     """Class that communicated with local git installation.
     """
@@ -76,6 +113,15 @@ class Git:
             f'--work-tree={self.local}',
         ] + list(args)
         return exec_sub_process(full_args, self.verbose)
+
+    def _execute_git_cmd_yield(self, *args: "list[str]"):
+        full_args = [
+            "git",
+            f'--git-dir={self.local_git}',
+            f'--work-tree={self.local}',
+        ] + list(args)
+        for line in exec_sub_process_yield(full_args, self.verbose):
+            yield line
 
     def _execute_git_cmd_split_strip(self, *args):
         return list(map(lambda x: x.strip(), (
@@ -177,6 +223,25 @@ class Git:
         Returns:
             str: Git log as text
         """
+        return "".join(self._yield_line_log(
+            pretty=pretty,
+            end_ref=end_ref,
+            start_ref=start_ref,
+            first_parent=first_parent,
+            submodule=submodule,
+            patch=patch,
+            other=other,
+        ))
+
+    def _yield_line_log(  # pylint: disable=too-many-arguments
+        self,
+        pretty,
+        end_ref, start_ref=None,
+        first_parent=False,
+        submodule=None,
+        patch=False,
+        other=None,
+    ):
         args = [
             "--no-pager",
             "log",
@@ -188,8 +253,8 @@ class Git:
         ] + (other if other else [])
         args = list(filter(lambda x: x is not None, args))
 
-        output = self._execute_git_cmd(*args)
-        return output
+        for line in self._execute_git_cmd_yield(*args):
+            yield line
 
     def show(  # pylint: disable=too-many-arguments
         self,
@@ -247,7 +312,10 @@ class Git:
             r"#SB#%n%b%n#EB#%n"
         )
 
-        log_text = self.log(
+        entries = []
+        collect_lines = []
+
+        for line in self._yield_line_log(
             pretty=pretty,
             end_ref=end_ref,
             start_ref=start_ref,
@@ -255,12 +323,23 @@ class Git:
             other=["-m", "--numstat"],
             patch=patch,
             first_parent=first_parent,
-        )
+        ):
+            if line == '#CS#\n':
+                if collect_lines:
+                    entries.append(ChangeLogEntry.from_log_text(
+                        "".join(collect_lines)
+                    ))
 
-        return list(map(
-            ChangeLogEntry.from_log_text,
-            filter(lambda x: x, log_text.split('#CS#')),
-        ))
+                collect_lines = []
+            else:
+                collect_lines.append(line)
+
+        if collect_lines:
+            entries.append(ChangeLogEntry.from_log_text(
+                "".join(collect_lines)
+            ))
+
+        return entries
 
     def show_changelog_entry(self, ref, patch=False):
         """Show single changelog entry
@@ -300,14 +379,16 @@ class Git:
         Returns:
             List[ChangeLogEntry]: Linear ChangeLogEntry log
         """
-        log_text = self.log(
+
+        entries = []
+
+        for line in self._yield_line_log(
             pretty="%H[%P]",
             end_ref=end_ref,
-        )
-        return list(map(
-            ChangeLogEntry.from_head_log_text,
-            log_text.split("\n"),
-        ))
+        ):
+            entries.append(ChangeLogEntry.from_head_log_text(line))
+
+        return entries
 
     def show_parentlog_entry(self, ref):
         """Show parent log entry information
