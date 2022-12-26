@@ -244,11 +244,11 @@ class TestMergeDebt(TestCase):
         merge_debt.execute_matcher(DirectCherryPickMatcher())
 
         self.assertEqual(
-            merge_debt.report.entries[0].match.base.sha,
+            merge_debt.report.alerts[0].match.base.sha,
             "a19",
         )
         self.assertEqual(
-            merge_debt.report.entries[0].match.head.sha,
+            merge_debt.report.alerts[0].match.head.sha,
             "a6c",
         )
 

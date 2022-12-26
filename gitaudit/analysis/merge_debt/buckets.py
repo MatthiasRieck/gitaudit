@@ -148,7 +148,7 @@ def get_sha_to_bucket_entry_map(buckets: List[BucketEntry]) \
     return bucket_map, entry_map
 
 
-def get_linear_bucket_list(buckets: List[BucketEntry]):
+def get_linear_bucket_list(buckets: List[BucketEntry]) -> List[BucketEntry]:
     """Generate a linear list of all bucket entries
 
     Args:
@@ -245,3 +245,18 @@ class BucketList:
 
         for sha in merge_shas:
             self.prune_sha(sha)
+
+    def get_branch_entries(self) -> List[ChangeLogEntry]:
+        """Returns Branch entries as a linear list
+
+        Returns:
+            List[ChangeLogEntry]: linear list of branch entries
+        """
+        lin_buckets = get_linear_bucket_list(self.entries)
+
+        lin_entries = []
+
+        for bucket in lin_buckets:
+            lin_entries.extend(bucket.branch_commits)
+
+        return lin_entries
