@@ -14,10 +14,10 @@ from .buckets import BucketEntry, get_sha_to_bucket_entry_map
 class MatchConfidence(Enum):
     """Enumeration for showing Match Confidence
     """
-    ABSOLUTE = 1
-    STRONG = 2
-    GOOD = 3
-    LOW = 4
+    ABSOLUTE = "ABSOLUTE"
+    STRONG = "STRONG"
+    GOOD = "GOOD"
+    LOW = "LOW"
 
 
 class MatchResult(BaseModel):

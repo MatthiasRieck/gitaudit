@@ -11,7 +11,7 @@ from gitaudit.branch.tree import Tree
 
 from .matchers import Matcher, MatchConfidence, MatchResult
 from .buckets import BucketList
-from .report import MergeDebtReport, MergeDebtReportEntry
+from .report import MergeDebtReport, MergeDebtAlert
 from .pruners import Pruner
 
 
@@ -70,7 +70,6 @@ class MergeDebt:
         self.head_buckets = BucketList(self.head_hier_log)
         self.base_buckets = BucketList(self.base_hier_log)
 
-        self.matches = []
         self.report = MergeDebtReport()
 
     # def ignore_shas(self, head_shas, base_shas=None):
@@ -113,12 +112,12 @@ class MergeDebt:
         """
         if match.head.sorted_numstat != match.base.sorted_numstat:
             if match.confidence in self.prunable_confidences:
-                self.report.append_entry(MergeDebtReportEntry.warning(
+                self.report.append_alert(MergeDebtAlert.warning(
                     match,
                     "Files changes / numstats do not match!",
                 ))
             else:
-                self.report.append_entry(MergeDebtReportEntry.info(
+                self.report.append_alert(MergeDebtAlert.info(
                     match,
                     "Files changes / numstats do not match!",
                 ))
@@ -146,7 +145,7 @@ class MergeDebt:
                 self.prune_head_sha(match.head.sha)
                 self.prune_base_sha(match.base.sha)
 
-            self.matches.append(match)
+            self.report.append_match(match)
 
     def execute_matchers(self, matchers: List[Matcher], prune=True):
         """Executed a list of matchers
@@ -172,5 +171,18 @@ class MergeDebt:
 
         for entry in head_prunes:
             self.prune_head_sha(entry.sha)
+            self.report.append_head_prune(entry)
         for entry in base_prunes:
             self.prune_base_sha(entry.sha)
+            self.report.append_base_prune(entry)
+
+    def report_dict(self) -> dict:
+        """Creates a report dict
+
+        Returns:
+            dict: report dictionary
+        """
+        return self.report.dict(
+            head_entries=self.head_buckets.get_branch_entries(),
+            base_entries=self.base_buckets.get_branch_entries(),
+        )

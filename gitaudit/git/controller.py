@@ -36,7 +36,7 @@ def exec_sub_process(args: "list[str]", verbose: "bool") -> "tuple(str, str)":
     )
     output, err = process.communicate()
 
-    output = output.decode("utf-8", "replace").strip()
+    output = output.decode(encoding="utf-8", errors="ignore").strip()
     err = err.decode("utf-8").strip()
 
     if verbose:
@@ -72,7 +72,7 @@ def exec_sub_process_yield(args: List[str], verbose: bool) -> str:
     )
     # output, err = process.communicate()
 
-    for line in io.TextIOWrapper(process.stdout, encoding="utf-8"):
+    for line in io.TextIOWrapper(process.stdout, encoding="utf-8", errors='ignore'):
         if verbose:
             print(line)
         yield line
