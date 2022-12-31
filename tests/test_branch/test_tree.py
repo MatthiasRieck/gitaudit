@@ -30,6 +30,11 @@ class TestTree(TestCase):
             ['d', 'c', 'b', 'a'],
         )
 
+        self.assertEqual(tree.root.end_sha, 'd')
+        self.assertEqual(tree.root.end_entry, hier_log[0])
+        self.assertEqual(tree.root.start_sha, 'a')
+        self.assertEqual(tree.root.start_entry, hier_log[-1])
+
     def test_add_longer(self):
         EXAMPLE = [
             "d[c]",
@@ -174,6 +179,16 @@ class TestTree(TestCase):
         self.assertEqual(
             tree.root.children['e'].children['4'].shas,
             ['4'],
+        )
+
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.end_sha, tree.flatten_segments()))),
+            ['4', 'b', 'd', 'e', 'f'],
+        )
+
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.end_sha, tree.end_segments()))),
+            ['4', 'd', 'f'],
         )
 
     def test_extend_branch_off(self):

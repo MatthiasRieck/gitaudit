@@ -28,10 +28,22 @@ class Segment(BaseModel):
         return self.entries[0].sha
 
     @property
+    def end_entry(self):
+        """Returns the last entry in this segment
+        """
+        return self.entries[0]
+
+    @property
     def start_sha(self):
         """Returns the sha of the first entry in this segment
         """
         return self.entries[-1].sha
+
+    @property
+    def start_entry(self):
+        """Returns the first entry in this segment
+        """
+        return self.entries[-1]
 
     @property
     def shas(self):
@@ -143,3 +155,28 @@ class Tree(BaseModel):
             seg = queue.pop(0)
             yield seg
             queue.extend(seg.children.values())
+
+    def flatten_segments(self) -> List[Segment]:
+        """Return all child segments of root as a flattened list
+
+        Returns:
+            List[Segment]: Flattened segments
+        """
+        segments = []
+
+        queue = [self.root]
+
+        while queue:
+            seg = queue.pop(0)
+            queue.extend(seg.children.values())
+            segments.append(seg)
+
+        return segments
+
+    def end_segments(self) -> List[Segment]:
+        """Return a list of end segments
+
+        Returns:
+            List[Segment]: end segments
+        """
+        return list(filter(lambda x: not x.children, self.flatten_segments()))
