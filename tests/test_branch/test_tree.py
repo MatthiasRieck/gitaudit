@@ -186,6 +186,11 @@ class TestTree(TestCase):
             ['4', 'b', 'd', 'e', 'f'],
         )
 
+        self.assertListEqual(
+            sorted(list(map(lambda x: x.end_sha, tree.end_segments()))),
+            ['4', 'd', 'f'],
+        )
+
     def test_extend_branch_off(self):
         EXAMPLE = [
             "d[c]",

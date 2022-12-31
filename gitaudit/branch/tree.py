@@ -172,3 +172,11 @@ class Tree(BaseModel):
             segments.append(seg)
 
         return segments
+
+    def end_segments(self) -> List[Segment]:
+        """Return a list of end segments
+
+        Returns:
+            List[Segment]: end segments
+        """
+        return list(filter(lambda x: not x.children, self.flatten_segments()))
