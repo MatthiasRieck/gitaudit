@@ -173,7 +173,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
             self.lanes.append(lane)
 
-    def create_svg(self) -> Svg:  # pylint: disable=too-many-locals
+    def create_svg(self) -> Svg:  # pylint: disable=too-many-locals, too-many-statements
         """Creates Svg object out of tree information
 
         Returns:
@@ -186,6 +186,8 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
         lane_initial_datetime_map = {
             x.ref_name: x.items[0].date_time for x in self.lanes
         }
+        lane_prev_pos = {}
+
         max_datetime = max(lane_initial_datetime_map.values())
         curr_offset_date = max_datetime
         curr_offset = 30
@@ -213,7 +215,9 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
                 font_family='monospace',
             ))
 
-        for indexxxx, item in enumerate(sorted_items):
+        from_ids = {x.from_id: x for x in self.connections}
+
+        for item in sorted_items:
             lane = self.id_lane_map[item.id]
             lane_index = self.lanes.index(lane)
 
@@ -225,16 +229,33 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
             delta_offset = min(delta_offset, MAX_GAP)
 
             curr_offset = curr_offset + delta_offset
+
+            if item.id in from_ids:
+                connect = from_ids[item.id]
+                _, to_ypos = id_locations[connect.to_id]
+                curr_offset = max(curr_offset, to_ypos + 20)
+
+            lane_offset = max(
+                curr_offset,
+                lane_progess_map[lane.ref_name] +
+                10 if lane.ref_name in lane_progess_map else curr_offset,
+            )
+
             curr_offset_date = item.date_time
 
             xpos = lane_index*200
-            ypos = curr_offset
+            ypos = lane_offset
             id_locations[item.id] = (xpos, ypos)
 
-            group_lines.append_child(Path(
-                points=[(xpos, lane_progess_map.get(
-                    lane.ref_name, 0)), (xpos, ypos)]
-            ))
+            if lane.ref_name in lane_prev_pos:
+                group_lines.append_child(Path(
+                    points=[lane_prev_pos[lane.ref_name], (xpos, ypos)]
+                ))
+            else:
+                group_lines.append_child(Path(
+                    points=[(xpos, 0), (xpos, ypos)]
+                ))
+            lane_prev_pos[lane.ref_name] = (xpos, ypos)
             text = Text(
                 xpos + 15,
                 ypos,
@@ -242,12 +263,15 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
                 horizontal_alignment=HorizontalAlignment.LEFT,
                 font_family='monospace',
             )
-            text_width, text_height = text.size
+            text_bounds = text.bounds
+            text_width, text_height = text_bounds[1] - \
+                text_bounds[0], text_bounds[3]-text_bounds[2]
             svg.append_child(Circle(xpos, ypos, 5))
             svg.append_child(Rect(xpos + 10, ypos - text_height/2-2, text_width+10,
                              text_height+4, rx=8, ry=8, stroke="transparent"))
             svg.append_child(text)
 
+            offset = 0
             if self.sha_svg_append_callback:
                 elems = self.sha_svg_append_callback(item.item)
 
@@ -264,7 +288,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
                     offset += bnds[3]-bnds[2] + 10
 
-            lane_progess_map[lane.ref_name] = curr_offset
+            lane_progess_map[lane.ref_name] = lane_offset + offset
 
         for connection in self.connections:
             pos_from = id_locations[connection.from_id]
