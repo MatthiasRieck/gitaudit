@@ -2,3 +2,4 @@ pydantic
 pytz
 humps
 requests
+svgdiagram==1.3.1

@@ -3,6 +3,7 @@ from gitaudit.branch.tree import Tree
 from gitaudit.branch.plotting import TreePlot
 from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log
 from gitaudit.git.change_log_entry import ChangeLogEntry
+from tests.test_custom_assert import assert_equal_svg
 
 
 def get_hier_log(data):
@@ -75,23 +76,23 @@ class TestTreePlot(TestCase):
 
     def test_across_branch_point(self):
         EXAMPLE = [
-            "d[c]",
-            "c[b]",
-            "b[a]",
-            "a[]",
+            "d[c](2022-01-04)",
+            "c[b](2022-01-03)",
+            "b[a](2022-01-02)",
+            "a[](2022-01-01)",
         ]
         EXAMPLE_BRANCH = [
-            "ab[f]",
-            "f[e]",
-            "e[b]",
-            "b[a]",
-            "a[]",
+            "ab[f](2022-01-05)",
+            "f[e](2022-01-04)",
+            "e[b](2022-01-03)",
+            "b[a](2022-01-02)",
+            "a[](2022-01-01)",
         ]
         EXAMPLE_HOTFIX = [
-            "4[e]",
-            "e[b]",
-            "b[a]",
-            "a[]",
+            "4[e](2022-01-04)",
+            "e[b](2022-01-03)",
+            "b[a](2022-01-02)",
+            "a[](2022-01-01)",
         ]
         hier_log_root = get_hier_log(EXAMPLE)
         hier_log_branch = get_hier_log(EXAMPLE_BRANCH)
@@ -116,3 +117,5 @@ class TestTreePlot(TestCase):
             plot.determine_ref_name_order(),
             ['main', 'branch', 'hotfix'],
         )
+
+        assert_equal_svg(plot.create_svg())
