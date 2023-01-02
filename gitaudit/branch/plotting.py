@@ -7,6 +7,8 @@ from typing import List, Dict, Tuple
 from pydantic import BaseModel
 
 from svgdiagram.elements.circle import Circle
+from svgdiagram.elements.rect import Rect
+from svgdiagram.elements.group import Group, TranslateTransform
 from svgdiagram.elements.path import Path
 from svgdiagram.elements.svg import Svg
 from svgdiagram.elements.text import Text, HorizontalAlignment, VerticalAlignment
@@ -58,13 +60,16 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
     """Class for plotting a branching tree
     """
 
-    def __init__(self, tree: Tree) -> None:
+    def __init__(self, tree: Tree, show_commit_callback=None, sha_svg_append_callback=None) -> None:
         self.tree = tree
         self.end_sha_seg_map = {
             seg.end_sha: seg for seg in self.tree.flatten_segments()
         }
         self.end_ref_name_seg_map = {
             x.branch_name: x for x in self.tree.flatten_segments()}
+
+        self.show_commit_callback = show_commit_callback
+        self.sha_svg_append_callback = sha_svg_append_callback
 
         self.lanes = []
         self.connections = []
@@ -131,6 +136,15 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
                 item=segment.end_entry,
             ))
 
+            if self.show_commit_callback:
+                for entry in segment.entries[1:]:
+                    if self.show_commit_callback(entry):
+                        lane.append_item(TreeLaneItem(
+                            id=entry.sha,
+                            date_time=entry.commit_date,
+                            item=entry,
+                        ))
+
             if segment.start_entry.parent_shas:
                 new_segment = self.end_sha_seg_map[segment.start_entry.parent_shas[0]]
                 if new_segment not in self.laned_segments:
@@ -159,7 +173,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
             self.lanes.append(lane)
 
-    def create_svg(self) -> Svg:  # pylint: disable=too-many-locals
+    def create_svg(self) -> Svg:  # pylint: disable=too-many-locals, too-many-statements
         """Creates Svg object out of tree information
 
         Returns:
@@ -172,6 +186,8 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
         lane_initial_datetime_map = {
             x.ref_name: x.items[0].date_time for x in self.lanes
         }
+        lane_prev_pos = {}
+
         max_datetime = max(lane_initial_datetime_map.values())
         curr_offset_date = max_datetime
         curr_offset = 30
@@ -187,10 +203,19 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
         id_locations = {}
 
         svg = Svg()
+        group_lines = Group()
+        svg.append_child(group_lines)
 
         for index, lane in enumerate(self.lanes):
-            svg.append_child(Text(index*200, -10, lane.ref_name,
-                             vertical_alignment=VerticalAlignment.BOTTOM))
+            svg.append_child(Text(
+                index*200,
+                -10,
+                lane.ref_name,
+                vertical_alignment=VerticalAlignment.BOTTOM,
+                font_family='monospace',
+            ))
+
+        from_ids = {x.from_id: x for x in self.connections}
 
         for item in sorted_items:
             lane = self.id_lane_map[item.id]
@@ -204,38 +229,77 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
             delta_offset = min(delta_offset, MAX_GAP)
 
             curr_offset = curr_offset + delta_offset
+
+            if item.id in from_ids:
+                connect = from_ids[item.id]
+                _, to_ypos = id_locations[connect.to_id]
+                curr_offset = max(curr_offset, to_ypos + 20)
+
+            lane_offset = max(
+                curr_offset,
+                lane_progess_map[lane.ref_name] +
+                10 if lane.ref_name in lane_progess_map else curr_offset,
+            )
+
             curr_offset_date = item.date_time
 
             xpos = lane_index*200
-            ypos = curr_offset
+            ypos = lane_offset
             id_locations[item.id] = (xpos, ypos)
 
-            svg.append_child(Path(
-                points=[(xpos, lane_progess_map.get(
-                    lane.ref_name, 0)), (xpos, ypos)]
-            ))
-            svg.append_child(Circle(xpos, ypos, 5))
-            svg.append_child(
-                Text(
-                    xpos + 10,
-                    ypos,
-                    item.item.sha[0:7],
-                    horizontal_alignment=HorizontalAlignment.LEFT,
-                )
+            if lane.ref_name in lane_prev_pos:
+                group_lines.append_child(Path(
+                    points=[lane_prev_pos[lane.ref_name], (xpos, ypos)]
+                ))
+            else:
+                group_lines.append_child(Path(
+                    points=[(xpos, 0), (xpos, ypos)]
+                ))
+            lane_prev_pos[lane.ref_name] = (xpos, ypos)
+            text = Text(
+                xpos + 15,
+                ypos,
+                item.item.sha[0:7],
+                horizontal_alignment=HorizontalAlignment.LEFT,
+                font_family='monospace',
             )
+            text_bounds = text.bounds
+            text_width, text_height = text_bounds[1] - \
+                text_bounds[0], text_bounds[3]-text_bounds[2]
+            svg.append_child(Circle(xpos, ypos, 5))
+            svg.append_child(Rect(xpos + 10, ypos - text_height/2-2, text_width+10,
+                             text_height+4, rx=8, ry=8, stroke="transparent"))
+            svg.append_child(text)
 
-            lane_progess_map[lane.ref_name] = curr_offset
+            offset = 0
+            if self.sha_svg_append_callback:
+                elems = self.sha_svg_append_callback(item.item)
+
+                offset = text_height/2 + 2 + 10
+                for elem in elems:
+                    bnds = elem.bounds
+                    svg.append_child(Group(
+                        elem,
+                        transforms=TranslateTransform(
+                            dx=xpos - bnds[0] + 10,
+                            dy=ypos - bnds[2] + offset,
+                        ),
+                    ))
+
+                    offset += bnds[3]-bnds[2] + 10
+
+            lane_progess_map[lane.ref_name] = lane_offset + offset
 
         for connection in self.connections:
             pos_from = id_locations[connection.from_id]
             pos_to = id_locations[connection.to_id]
-            svg.append_child(Path(
+            group_lines.append_child(Path(
                 points=[
                     pos_from,
                     (pos_to[0], pos_from[1]),
                     pos_to,
                 ],
-                corner_radius=5,
+                corner_radius=8,
             ))
 
         return svg

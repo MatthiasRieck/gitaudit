@@ -4,6 +4,7 @@ from gitaudit.branch.plotting import TreePlot
 from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log
 from gitaudit.git.change_log_entry import ChangeLogEntry
 from tests.test_custom_assert import assert_equal_svg
+from svgdiagram.elements.circle import Circle
 
 
 def get_hier_log(data):
@@ -12,6 +13,29 @@ def get_hier_log(data):
         data,
     ))
     return linear_log_to_hierarchy_log(lin_log)
+
+
+NEW_EXAMPLE = [
+    "d[c](2022-01-04)",
+    "c[b](2022-01-03)",
+    "b[a](2022-01-02)",
+    "a[](2022-01-01)",
+]
+NEW_EXAMPLE_BRANCH = [
+    "ab[f](2022-01-05)",
+    "f[e](2022-01-04)",
+    "e[34](2022-01-03)",
+    "34[b](2022-01-02T10:00)",
+    "b[a](2022-01-02)",
+    "a[](2022-01-01)",
+]
+NEW_EXAMPLE_HOTFIX = [
+    "4[e](2022-01-04)",
+    "e[34](2022-01-03)",
+    "34[b](2022-01-02T10:00)",
+    "b[a](2022-01-02)",
+    "a[](2022-01-01)",
+]
 
 
 class TestTreePlot(TestCase):
@@ -75,28 +99,9 @@ class TestTreePlot(TestCase):
         )
 
     def test_across_branch_point(self):
-        EXAMPLE = [
-            "d[c](2022-01-04)",
-            "c[b](2022-01-03)",
-            "b[a](2022-01-02)",
-            "a[](2022-01-01)",
-        ]
-        EXAMPLE_BRANCH = [
-            "ab[f](2022-01-05)",
-            "f[e](2022-01-04)",
-            "e[b](2022-01-03)",
-            "b[a](2022-01-02)",
-            "a[](2022-01-01)",
-        ]
-        EXAMPLE_HOTFIX = [
-            "4[e](2022-01-04)",
-            "e[b](2022-01-03)",
-            "b[a](2022-01-02)",
-            "a[](2022-01-01)",
-        ]
-        hier_log_root = get_hier_log(EXAMPLE)
-        hier_log_branch = get_hier_log(EXAMPLE_BRANCH)
-        hier_log_hotfix = get_hier_log(EXAMPLE_HOTFIX)
+        hier_log_root = get_hier_log(NEW_EXAMPLE)
+        hier_log_branch = get_hier_log(NEW_EXAMPLE_BRANCH)
+        hier_log_hotfix = get_hier_log(NEW_EXAMPLE_HOTFIX)
 
         tree = Tree()
         tree.append_log(hier_log_root, 'main')
@@ -109,8 +114,95 @@ class TestTreePlot(TestCase):
             plot._get_end_seg_counts(),
             {
                 "main": (1, -2),
-                "branch": (3, -5),
-                "hotfix": (3, -4),
+                "branch": (3, -6),
+                "hotfix": (3, -5),
+            }
+        )
+        self.assertEqual(
+            plot.determine_ref_name_order(),
+            ['main', 'branch', 'hotfix'],
+        )
+
+        assert_equal_svg(plot.create_svg())
+
+    def test_sha_svg_append_callback(self):
+        hier_log_root = get_hier_log(NEW_EXAMPLE)
+        hier_log_branch = get_hier_log(NEW_EXAMPLE_BRANCH)
+        hier_log_hotfix = get_hier_log(NEW_EXAMPLE_HOTFIX)
+
+        tree = Tree()
+        tree.append_log(hier_log_root, 'main')
+        tree.append_log(hier_log_branch, 'branch')
+        tree.append_log(hier_log_hotfix, 'hotfix')
+
+        plot = TreePlot(
+            tree, sha_svg_append_callback=lambda _: [Circle(0, 0, 10), Circle(0, 0, 10)])
+
+        self.assertDictEqual(
+            plot._get_end_seg_counts(),
+            {
+                "main": (1, -2),
+                "branch": (3, -6),
+                "hotfix": (3, -5),
+            }
+        )
+        self.assertEqual(
+            plot.determine_ref_name_order(),
+            ['main', 'branch', 'hotfix'],
+        )
+
+        assert_equal_svg(plot.create_svg())
+
+    def test_show_commit_callback(self):
+        hier_log_root = get_hier_log(NEW_EXAMPLE)
+        hier_log_branch = get_hier_log(NEW_EXAMPLE_BRANCH)
+        hier_log_hotfix = get_hier_log(NEW_EXAMPLE_HOTFIX)
+
+        tree = Tree()
+        tree.append_log(hier_log_root, 'main')
+        tree.append_log(hier_log_branch, 'branch')
+        tree.append_log(hier_log_hotfix, 'hotfix')
+
+        plot = TreePlot(tree, show_commit_callback=lambda _: True)
+
+        self.assertDictEqual(
+            plot._get_end_seg_counts(),
+            {
+                "main": (1, -2),
+                "branch": (3, -6),
+                "hotfix": (3, -5),
+            }
+        )
+        self.assertEqual(
+            plot.determine_ref_name_order(),
+            ['main', 'branch', 'hotfix'],
+        )
+
+        assert_equal_svg(plot.create_svg())
+
+    def test_show_commit_callback_sha_svg_append_callback(self):
+        hier_log_root = get_hier_log(NEW_EXAMPLE)
+        hier_log_branch = get_hier_log(NEW_EXAMPLE_BRANCH)
+        hier_log_hotfix = get_hier_log(NEW_EXAMPLE_HOTFIX)
+
+        tree = Tree()
+        tree.append_log(hier_log_root, 'main')
+        tree.append_log(hier_log_branch, 'branch')
+        tree.append_log(hier_log_hotfix, 'hotfix')
+
+        plot = TreePlot(
+            tree,
+            show_commit_callback=lambda _: True,
+            sha_svg_append_callback=lambda _: [
+                Circle(0, 0, 10), Circle(0, 0, 10)],
+        )
+
+        self.assertDictEqual(
+            plot._get_end_seg_counts(),
+            {
+                "main": (1, -2),
+                "branch": (3, -6),
+                "hotfix": (3, -5),
             }
         )
         self.assertEqual(
