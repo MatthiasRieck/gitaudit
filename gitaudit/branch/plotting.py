@@ -138,7 +138,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
                 else:
                     # need to create new connection here
                     self.connections.append(TreeConnection(
-                        to_id=segment.start_sha,
+                        to_id=lane.items[-1].id,
                         from_id=segment.start_entry.parent_shas[0],
                     ))
                     segment = None
@@ -227,11 +227,15 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
             lane_progess_map[lane.ref_name] = curr_offset
 
         for connection in self.connections:
+            pos_from = id_locations[connection.from_id]
+            pos_to = id_locations[connection.to_id]
             svg.append_child(Path(
                 points=[
-                    id_locations[connection.from_id],
-                    id_locations[connection.to_id],
+                    pos_from,
+                    (pos_to[0], pos_from[1]),
+                    pos_to,
                 ],
+                corner_radius=5,
             ))
 
         return svg
