@@ -24,7 +24,7 @@ class TestLinearLogToHierarchyLog(TestCase):
 
     def test_example_b(self):
         EXAMPLE_B = [
-            "d[b, c]",
+            "d[b c]",
             "c[a]",
             "b[a]",
             "a[]",
@@ -85,7 +85,7 @@ class TestLinearLogToHierarchyLog(TestCase):
 
     def test_octor_merge(self):
         EXAMPLE_OCTO_MERGE = [
-            "a[b, c, d]",
+            "a[b c d]",
             "b[]",
             "c[b]",
             "d[b]",
@@ -211,7 +211,7 @@ class TestHierarchyLogToLinearLog(TestCase):
 
     def test_octor_merge(self):
         EXAMPLE_OCTO_MERGE = [
-            "a[b, c, d]",
+            "a[b c d]",
             "b[]",
             "c[b]",
             "d[b]",
@@ -231,7 +231,7 @@ class TestHierarchyLogToLinearLog(TestCase):
 class TestChangeLogHydration(TestCase):
     def test_changelog_hydration(self):
         EXAMPLE_B = [
-            "d[b, c]",
+            "d[b c]",
             "c[a]",
             "b[a]",
             "a[]",

@@ -222,10 +222,13 @@ class ChangeLogEntry(BaseModel):
         Returns:
             ChangeLogEntry: Change log entry dataclass
         """
-        shas = re.findall('[a-f0-9]+', log_text)
+        res = re.findall(
+            r'([a-f0-9]+)\[(?:([a-f0-9\s]+))?\](?:\((.*?)\))?', log_text)
         return ChangeLogEntry(
-            sha=shas[0],
-            parent_shas=shas[1:],
+            sha=res[0][0],
+            parent_shas=res[0][1].split(' ') if res[0][1] else [],
+            commit_date=datetime.fromisoformat(
+                res[0][2]) if res[0][2] else None
         )
 
     @classmethod
