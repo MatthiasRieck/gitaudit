@@ -156,7 +156,7 @@ class TestGit(TestCase):
             ],
         )
         self.assert_git_called_with_args(
-            '--no-pager', 'log', '--pretty=%H[%P]', 'main'
+            '--no-pager', 'log', '--pretty=%H[%P](%D)', 'main'
         )
 
     def test_log_changelog(self):
@@ -201,7 +201,7 @@ class TestGit(TestCase):
             ChangeLogEntry(sha='b', parent_shas=['a']),
         )
         self.assert_git_called_with_args(
-            'show', '--pretty=%H[%P]', 'b'
+            'show', '--pretty=%H[%P](%D)', 'b'
         )
 
     def test_show_changelog_entry(self):
