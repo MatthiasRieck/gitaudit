@@ -383,7 +383,7 @@ class Git:
         entries = []
 
         for line in self._yield_line_log(
-            pretty="%H[%P](%D)",
+            pretty=r"%H[%P](%cI)",
             end_ref=end_ref,
         ):
             entries.append(ChangeLogEntry.from_head_log_text(line))
@@ -401,7 +401,7 @@ class Git:
                 information
         """
         log_text = self.show(
-            pretty="%H[%P](%D)",
+            pretty=r"%H[%P](%cI)",
             ref=ref,
         )
         return ChangeLogEntry.from_head_log_text(log_text)

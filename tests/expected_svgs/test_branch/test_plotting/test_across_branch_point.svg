@@ -17,6 +17,6 @@
   <path d="M 0.00 80.00 L 0.00 180.00" stroke="black" stroke-width="1px" fill="transparent"></path>
   <circle cx="0" cy="180.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
   <text x="10" y="180.0" text-anchor="start" dominant-baseline="central" font-family="arial" font-size="16.0" font-weight="normal">b</text>
-  <path d="M 0.00 180.00 L 200.00 130.00" stroke="black" stroke-width="1px" fill="transparent"></path>
-  <path d="M 200.00 130.00 L 400.00 80.00" stroke="black" stroke-width="1px" fill="transparent"></path>
+  <path d="M 0.00 180.00 L 195.00 180.00 A 5.00 5.00 0 0 0 200.00 175.00 L 200.00 130.00" stroke="black" stroke-width="1px" fill="transparent"></path>
+  <path d="M 200.00 130.00 L 395.00 130.00 A 5.00 5.00 0 0 0 400.00 125.00 L 400.00 80.00" stroke="black" stroke-width="1px" fill="transparent"></path>
 </svg>
