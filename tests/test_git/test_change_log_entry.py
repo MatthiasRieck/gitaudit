@@ -226,3 +226,9 @@ class TestChangeLogEntry(TestCase):
 
         self.assertListEqual(copy_entry.branch_offs, [])
         self.assertListEqual(copy_entry.other_parents, [])
+
+    def test_head_parent_log_with_datetime(self):
+        entry = ChangeLogEntry.from_head_log_text('a[b c](2023-01-01T10:00)')
+        self.assertEqual(entry.sha, 'a')
+        self.assertListEqual(entry.parent_shas, ['b', 'c'])
+        self.assertEqual(entry.commit_date, datetime(2023, 1, 1, 10))
