@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="481.0" height="281.5" viewBox="-40.50 -91.00 481.00 281.50">
+  <g>
+    <path d="M 200.00 0.00 L 200.00 30.00" stroke="black" stroke-width="1px" fill="transparent"></path>
+    <path d="M 0.00 0.00 L 0.00 80.00" stroke="black" stroke-width="1px" fill="transparent"></path>
+    <path d="M 400.00 0.00 L 400.00 80.00" stroke="black" stroke-width="1px" fill="transparent"></path>
+    <path d="M 200.00 30.00 L 200.00 130.00" stroke="black" stroke-width="1px" fill="transparent"></path>
+    <path d="M 0.00 80.00 L 0.00 180.00" stroke="black" stroke-width="1px" fill="transparent"></path>
+    <path d="M 0.00 180.00 L 192.00 180.00 A 8.00 8.00 0 0 0 200.00 172.00 L 200.00 130.00" stroke="black" stroke-width="1px" fill="transparent"></path>
+    <path d="M 200.00 130.00 L 392.00 130.00 A 8.00 8.00 0 0 0 400.00 122.00 L 400.00 80.00" stroke="black" stroke-width="1px" fill="transparent"></path>
+  </g>
+  <g transform="translate(0.0, -50.5)">
+    <g>
+      <circle cx="0" cy="0" r="40" stroke="black" stroke-width="1px" fill="white"></circle>
+      <text x="0" y="0" text-anchor="middle" dominant-baseline="central" font-family="arial" font-size="16.0" font-weight="normal">main</text>
+    </g>
+  </g>
+  <g transform="translate(200.0, -50.5)">
+    <g>
+      <circle cx="0" cy="0" r="40" stroke="black" stroke-width="1px" fill="white"></circle>
+      <text x="0" y="0" text-anchor="middle" dominant-baseline="central" font-family="arial" font-size="16.0" font-weight="normal">branch</text>
+    </g>
+  </g>
+  <g transform="translate(400.0, -50.5)">
+    <g>
+      <circle cx="0" cy="0" r="40" stroke="black" stroke-width="1px" fill="white"></circle>
+      <text x="0" y="0" text-anchor="middle" dominant-baseline="central" font-family="arial" font-size="16.0" font-weight="normal">hotfix</text>
+    </g>
+  </g>
+  <circle cx="200" cy="30.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
+  <rect x="210" y="20.0" width="29.19999999999999" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+  <text x="215" y="30.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">ab</text>
+  <circle cx="0" cy="80.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
+  <rect x="10" y="70.0" width="19.6" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+  <text x="15" y="80.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">d</text>
+  <circle cx="400" cy="80.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
+  <rect x="410" y="70.0" width="19.600000000000023" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+  <text x="415" y="80.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">4</text>
+  <circle cx="200" cy="130.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
+  <rect x="210" y="120.0" width="19.599999999999994" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+  <text x="215" y="130.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">e</text>
+  <circle cx="0" cy="180.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
+  <rect x="10" y="170.0" width="19.6" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+  <text x="15" y="180.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">b</text>
+</svg>

@@ -5,6 +5,8 @@ from gitaudit.branch.hierarchy import linear_log_to_hierarchy_log
 from gitaudit.git.change_log_entry import ChangeLogEntry
 from tests.test_custom_assert import assert_equal_svg
 from svgdiagram.elements.circle import Circle
+from svgdiagram.elements.group import Group
+from svgdiagram.elements.text import Text
 
 
 def get_hier_log(data):
@@ -177,6 +179,39 @@ class TestTreePlot(TestCase):
             show_commit_callback=lambda _: True,
             sha_svg_append_callback=lambda _: [
                 Circle(0, 0, 10), Circle(0, 0, 10)],
+        )
+
+        self.assertDictEqual(
+            plot._get_end_seg_counts(),
+            {
+                "main": (0, 1, -2),
+                "branch": (172800, 3, -6),
+                "hotfix": (172800, 3, -5),
+            }
+        )
+        self.assertEqual(
+            plot.determine_ref_name_order(),
+            ['main', 'branch', 'hotfix'],
+        )
+
+        assert_equal_svg(plot.create_svg())
+
+    def test_ref_name_formatting_callback(self):
+        hier_log_root = get_hier_log(NEW_EXAMPLE)
+        hier_log_branch = get_hier_log(NEW_EXAMPLE_BRANCH)
+        hier_log_hotfix = get_hier_log(NEW_EXAMPLE_HOTFIX)
+
+        tree = Tree()
+        tree.append_log(hier_log_root, 'main')
+        tree.append_log(hier_log_branch, 'branch')
+        tree.append_log(hier_log_hotfix, 'hotfix')
+
+        plot = TreePlot(
+            tree,
+            ref_name_formatting_callback=lambda x: Group([
+                Circle(0, 0, 40),
+                Text(0, 0, x),
+            ]),
         )
 
         self.assertDictEqual(
