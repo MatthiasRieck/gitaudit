@@ -50,7 +50,7 @@ class Github:
         """
         return self._call(f"mutation {{{mutationdata}}}")
 
-    def pull_request(self, owner: str, repo: str, number: int, querydata: str):
+    def pull_request(self, owner: str, repo: str, number: int, querydata: str) -> PullRequest:
         """Queries Pull Request Information
 
         Args:
@@ -62,8 +62,20 @@ class Github:
         Returns:
             PullRequest: The pull request object
         """
-        res = self.query(f"""
-            repository(owner:"{owner}", name:"{repo}") {{
-                pullRequest(number:{number}) {{ {querydata} }}
-        }}""")
+        res = self.query((
+            f'repository(owner:"{owner}", name:"{repo}")'
+            f'{{ pullRequest(number:{number}) {{ {querydata} }} }}'
+        ))
         return PullRequest.parse_obj(res['repository']['pullRequest'])
+
+    def add_comment(self, subject_id: str, body: str):
+        """Adds a comment to an issue or pull request
+
+        Args:
+            subject_id (str): The id of the issue or pull request
+            body (str): The body of the comment (can be markdown)
+        """
+        self.mutation((
+            f'addComment(input: {{body: "{body}", subjectId: "{subject_id}"}})'
+            '{ clientMutationId }'
+        ))

@@ -104,8 +104,26 @@ class TestGithub(TestCase):
 
         self.assertEqual(res, ref)
         self.assert_github_called_with_args_list(
-            {"url": GQL_URL, "json": {
-                "query": 'query {\n            repository(owner:"python", name:"cpython") {\n                pullRequest(number:98604) { dummy }\n        }}',  # noqa: E501
+            {
+                "url": GQL_URL,
+                "json": {
+                    "query": 'query {repository(owner:"python", name:"cpython"){ pullRequest(number:98604) { dummy } }}',  # noqa: E501
+                }
             }
+        )
+
+    def test_add_comment(self):
+        self.session_mock.append_success_post({
+            'data': 'success'
+        })
+        github = Github(token="dummy")
+
+        github.add_comment('dummyid', 'dummybody')
+        self.assert_github_called_with_args_list(
+            {
+                "url": GQL_URL,
+                "json": {
+                    "query": 'mutation {addComment(input: {body: "dummybody", subjectId: "dummyid"}){ clientMutationId }}',  # noqa: E501
+                }
             }
         )
