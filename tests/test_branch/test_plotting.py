@@ -40,13 +40,7 @@ NEW_EXAMPLE_HOTFIX = [
 
 class TestTreePlot(TestCase):
     def test_initial(self):
-        EXAMPLE_A = [
-            "d[c]",
-            "c[b]",
-            "b[a]",
-            "a[]",
-        ]
-        hier_log = get_hier_log(EXAMPLE_A)
+        hier_log = get_hier_log(NEW_EXAMPLE)
 
         tree = Tree()
         tree.append_log(hier_log, 'main')
@@ -56,7 +50,7 @@ class TestTreePlot(TestCase):
         self.assertDictEqual(
             plot._get_end_seg_counts(),
             {
-                "main": (1, -4)
+                "main": (0, 1, -4)
             }
         )
         self.assertEqual(
@@ -65,20 +59,8 @@ class TestTreePlot(TestCase):
         )
 
     def test_add_branch_off(self):
-        EXAMPLE = [
-            "d[c]",
-            "c[b]",
-            "b[a]",
-            "a[]",
-        ]
-        EXAMPLE_BRANCH = [
-            "f[e]",
-            "e[b]",
-            "b[a]",
-            "a[]",
-        ]
-        hier_log_root = get_hier_log(EXAMPLE)
-        hier_log_branch = get_hier_log(EXAMPLE_BRANCH)
+        hier_log_root = get_hier_log(NEW_EXAMPLE)
+        hier_log_branch = get_hier_log(NEW_EXAMPLE_BRANCH)
 
         tree = Tree()
         tree.append_log(hier_log_root, 'main')
@@ -89,8 +71,8 @@ class TestTreePlot(TestCase):
         self.assertDictEqual(
             plot._get_end_seg_counts(),
             {
-                "main": (1, -2),
-                "branch": (2, -4)
+                "main": (0, 1, -2),
+                "branch": (172800, 2, -6)
             }
         )
         self.assertEqual(
@@ -113,9 +95,9 @@ class TestTreePlot(TestCase):
         self.assertDictEqual(
             plot._get_end_seg_counts(),
             {
-                "main": (1, -2),
-                "branch": (3, -6),
-                "hotfix": (3, -5),
+                "main": (0, 1, -2),
+                "branch": (172800, 3, -6),
+                "hotfix": (172800, 3, -5),
             }
         )
         self.assertEqual(
@@ -141,9 +123,9 @@ class TestTreePlot(TestCase):
         self.assertDictEqual(
             plot._get_end_seg_counts(),
             {
-                "main": (1, -2),
-                "branch": (3, -6),
-                "hotfix": (3, -5),
+                "main": (0, 1, -2),
+                "branch": (172800, 3, -6),
+                "hotfix": (172800, 3, -5),
             }
         )
         self.assertEqual(
@@ -168,9 +150,9 @@ class TestTreePlot(TestCase):
         self.assertDictEqual(
             plot._get_end_seg_counts(),
             {
-                "main": (1, -2),
-                "branch": (3, -6),
-                "hotfix": (3, -5),
+                "main": (0, 1, -2),
+                "branch": (172800, 3, -6),
+                "hotfix": (172800, 3, -5),
             }
         )
         self.assertEqual(
@@ -200,9 +182,9 @@ class TestTreePlot(TestCase):
         self.assertDictEqual(
             plot._get_end_seg_counts(),
             {
-                "main": (1, -2),
-                "branch": (3, -6),
-                "hotfix": (3, -5),
+                "main": (0, 1, -2),
+                "branch": (172800, 3, -6),
+                "hotfix": (172800, 3, -5),
             }
         )
         self.assertEqual(
