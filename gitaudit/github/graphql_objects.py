@@ -54,6 +54,7 @@ class PullRequest(GraphQlBase):
     body: Optional[str]
     title: Optional[str]
     url: Optional[str]
+    id: Optional[str]
     repository: Optional[Repository]
     reviews: Optional[List[PullRequestReview]]
 
@@ -67,7 +68,8 @@ class PullRequest(GraphQlBase):
         Returns:
             dict: The valiated and transformed input data
         """
-        data['commits'] = list(map(lambda x: x['commit'], data['commits']))
+        if 'commits' in data:
+            data['commits'] = list(map(lambda x: x['commit'], data['commits']))
         return data
 
 
