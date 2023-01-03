@@ -89,7 +89,7 @@ M:[zuul@review.opendev.org]
 
 1	1	tripleo-heat-templates
 
-Submodule tripleo-heat-templates d51bb6de7a...9313779610 (commits not present)
+Submodule tripleo/heat-temp_lates d51bb6de7a...9313779610 (commits not present)
 """.strip()
 
 
@@ -206,7 +206,7 @@ class TestChangeLogEntry(TestCase):
         self.assertEqual(entry.body, '* Update')
 
         self.assertEqual(
-            entry.submodule_updates[0].submodule_name, 'tripleo-heat-templates')
+            entry.submodule_updates[0].submodule_name, 'tripleo/heat-temp_lates')
         self.assertEqual(entry.submodule_updates[0].from_sha, 'd51bb6de7a')
         self.assertEqual(entry.submodule_updates[0].to_sha, '9313779610')
 

@@ -97,7 +97,7 @@ def extract_submodule_update(numstat_text):
         List[Dict[str, any]]: List of dictionaries
     """
     content = re.findall(
-        r'Submodule\s*([\d\w\-_]+)\s*([a-f0-9]+)\.{3}([a-f0-9]+)',
+        r'Submodule\s*(.*?)\s*([a-f0-9]+)\.{3}([a-f0-9]+)',
         numstat_text,
     )
     return list(map(lambda x: {

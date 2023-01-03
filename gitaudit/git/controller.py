@@ -249,7 +249,7 @@ class Git:
             "--first-parent" if first_parent else None,
             f"--submodule={submodule}" if submodule else None,
             "-p" if patch else None,
-            f"{start_ref}..{end_ref}" if start_ref else end_ref,
+            f"{start_ref}...{end_ref}" if start_ref else end_ref,
         ] + (other if other else [])
         args = list(filter(lambda x: x is not None, args))
 
@@ -367,7 +367,7 @@ class Git:
 
         return ChangeLogEntry.from_log_text(log_text)
 
-    def log_parentlog(self, end_ref):
+    def log_parentlog(self, end_ref, start_ref=None):
         """Given an end_ref this function
         will return ChangeLogEntry list (linear log)
         with sha and parent shas which can
@@ -375,6 +375,7 @@ class Git:
 
         Args:
             end_ref (str): End Ref
+            start_ref(str): Start Ref
 
         Returns:
             List[ChangeLogEntry]: Linear ChangeLogEntry log
@@ -385,6 +386,7 @@ class Git:
         for line in self._yield_line_log(
             pretty=r"%H[%P](%cI)",
             end_ref=end_ref,
+            start_ref=start_ref,
         ):
             entries.append(ChangeLogEntry.from_head_log_text(line))
 
