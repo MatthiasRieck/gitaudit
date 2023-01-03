@@ -60,7 +60,13 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
     """Class for plotting a branching tree
     """
 
-    def __init__(self, tree: Tree, show_commit_callback=None, sha_svg_append_callback=None) -> None:
+    def __init__(
+            self,
+            tree: Tree,
+            show_commit_callback=None,
+            sha_svg_append_callback=None,
+            ref_name_formatting_callback=None,
+    ) -> None:
         self.tree = tree
         self.end_sha_seg_map = {
             seg.end_sha: seg for seg in self.tree.flatten_segments()
@@ -70,6 +76,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
         self.show_commit_callback = show_commit_callback
         self.sha_svg_append_callback = sha_svg_append_callback
+        self.ref_name_formatting_callback = ref_name_formatting_callback
 
         self.lanes = []
         self.connections = []
@@ -218,13 +225,26 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
         svg.append_child(group_lines)
 
         for index, lane in enumerate(self.lanes):
-            svg.append_child(Text(
-                index*200,
-                -10,
-                lane.ref_name,
-                vertical_alignment=VerticalAlignment.BOTTOM,
-                font_family='monospace',
-            ))
+            lxpos = index*200
+            lypos = -10
+            if self.ref_name_formatting_callback:
+                elem = self.ref_name_formatting_callback(lane.ref_name)
+                bnds = elem.bounds
+                svg.append_child(Group(
+                    elem,
+                    transforms=TranslateTransform(
+                        dx=lxpos - (bnds[0]+bnds[1]) / 2.0,
+                        dy=lypos - bnds[3],
+                    )
+                ))
+            else:
+                svg.append_child(Text(
+                    lxpos,
+                    lypos,
+                    lane.ref_name,
+                    vertical_alignment=VerticalAlignment.BOTTOM,
+                    font_family='monospace',
+                ))
 
         from_ids = {x.from_id: x for x in self.connections}
 
