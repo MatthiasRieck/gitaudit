@@ -159,6 +159,22 @@ class TestGit(TestCase):
             '--no-pager', 'log', '--pretty=%H[%P](%cI)', 'main'
         )
 
+    def test_log_start_sha(self):
+        self.append_process_return_text(
+            'c[b]\nb[a]\na[]'
+        )
+        self.assertListEqual(
+            Git('', '').log_parentlog(end_ref='main', start_ref='dummyref'),
+            [
+                ChangeLogEntry(sha='c', parent_shas=['b']),
+                ChangeLogEntry(sha='b', parent_shas=['a']),
+                ChangeLogEntry(sha='a', parent_shas=[]),
+            ],
+        )
+        self.assert_git_called_with_args(
+            '--no-pager', 'log', '--pretty=%H[%P](%cI)', 'dummyref...main'
+        )
+
     def test_log_changelog(self):
         self.append_process_return_text(
             "#CS#\n"+LOG_ENTRY_HEAD+"\n#CS#\n"+LOG_ENTRY_NO_PARENT
