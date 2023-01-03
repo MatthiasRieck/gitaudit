@@ -2,8 +2,13 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from gitaudit.github.instance import Github
+from gitaudit.github.graphql_objects import PullRequest
+
+import os
+import json
 
 
+ASSETS_ROOT = os.path.join(os.path.dirname(__file__), 'assets')
 GQL_URL = "https://api.github.com/graphql"
 
 
@@ -67,4 +72,40 @@ class TestGithub(TestCase):
         self.assertEqual(res, 'success')
         self.assert_github_called_with_args_list(
             {"url": GQL_URL, "json": {"query": r'query {testquery}'}}
+        )
+
+    def test_mutation(self):
+        self.session_mock.append_success_post({'data': 'success'})
+        github = Github(token="dummy")
+
+        res = github.mutation('testmutation')
+
+        self.assertEqual(res, 'success')
+        self.assert_github_called_with_args_list(
+            {"url": GQL_URL, "json": {"query": r'mutation {testmutation}'}}
+        )
+
+    def test_pull_request(self):
+        fp = os.path.join(ASSETS_ROOT, 'json_ret_pull_request.json')
+        with open(fp, 'r') as f:
+            json_data = json.load(f)
+
+        self.session_mock.append_success_post({
+            'data': {
+                'repository': {
+                    'pullRequest': json_data
+                }
+            }
+        })
+        github = Github(token="dummy")
+
+        res = github.pull_request('python', 'cpython', 98604, 'dummy')
+        ref = PullRequest.parse_obj(json_data)
+
+        self.assertEqual(res, ref)
+        self.assert_github_called_with_args_list(
+            {"url": GQL_URL, "json": {
+                "query": 'query {\n            repository(owner:"python", name:"cpython") {\n                pullRequest(number:98604) { dummy }\n        }}',  # noqa: E501
+            }
+            }
         )
