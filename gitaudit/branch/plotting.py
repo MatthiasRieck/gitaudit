@@ -81,7 +81,8 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
         """For the given tree return the segment / sha count from each end point to the root
 
         Returns:
-            Dict[str, Tuple[int, int]]: Seg / sha count distance information from the root
+            Dict[str, Tuple[int, int, int]]: second / Seg / sha count distance information
+            from the root
         """
         root_ref_name = self.tree.root.branch_name
         assert root_ref_name in self.end_ref_name_seg_map
@@ -93,6 +94,9 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
             curr_segment = segment
             seg_count = 1
             sha_count = curr_segment.length
+            seconds_from_root_end = \
+                int((root_end_segment.end_entry.commit_date -
+                     curr_segment.end_entry.commit_date).total_seconds())
 
             while curr_segment.end_sha != root_end_segment.end_sha:
                 if curr_segment.branch_name != root_ref_name:
@@ -101,6 +105,10 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
                     if curr_segment.branch_name != root_ref_name:
                         seg_count += 1
                         sha_count += curr_segment.length
+                    else:
+                        seconds_from_root_end = \
+                            int((root_end_segment.end_entry.commit_date -
+                                 curr_segment.end_entry.commit_date).total_seconds())
                 else:
                     curr_segment = list(filter(
                         lambda x: x.branch_name == root_ref_name, curr_segment.children.values()
@@ -108,7 +116,9 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
                     seg_count += 1
                     sha_count += curr_segment.length
 
-            ref_name_counts[segment.branch_name] = (seg_count, -sha_count)
+            ref_name_counts[segment.branch_name] = (
+                seconds_from_root_end, seg_count, -sha_count
+            )
 
         return ref_name_counts
 
