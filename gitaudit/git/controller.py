@@ -291,7 +291,7 @@ class Git:
         output = self._execute_git_cmd(*args)
         return output
 
-    def log_changelog(self, end_ref, start_ref=False, first_parent=False, patch=False):
+    def log_changelog(self, end_ref, start_ref=None, first_parent=False, patch=False):
         """Create changelog
 
         Args:

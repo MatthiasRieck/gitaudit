@@ -73,7 +73,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
         self.lanes = []
         self.connections = []
-        self.laned_segments = []
+        self.laned_segment_end_shas = []
         self.id_item_map = {}
         self.id_lane_map = {}
 
@@ -94,7 +94,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
             seg_count = 1
             sha_count = curr_segment.length
 
-            while curr_segment != root_end_segment:
+            while curr_segment.end_sha != root_end_segment.end_sha:
                 if curr_segment.branch_name != root_ref_name:
                     # go down
                     curr_segment = self.end_sha_seg_map[curr_segment.start_entry.parent_shas[0]]
@@ -125,11 +125,12 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
         return sorted(end_ref_names, key=lambda x: ref_name_counts[x])
 
     def _create_lane(self, ref_name, hpos):
+        print(f'Create Lane: {ref_name}')
         lane = TreeLane(ref_name, hpos)
         segment = self.end_ref_name_seg_map[ref_name]
 
         while segment:
-            self.laned_segments.append(segment)
+            self.laned_segment_end_shas.append(segment.end_sha)
             lane.append_item(TreeLaneItem(
                 id=segment.end_entry.sha,
                 date_time=segment.end_entry.commit_date,
@@ -147,7 +148,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
             if segment.start_entry.parent_shas:
                 new_segment = self.end_sha_seg_map[segment.start_entry.parent_shas[0]]
-                if new_segment not in self.laned_segments:
+                if new_segment.end_sha not in self.laned_segment_end_shas:
                     segment = new_segment
                 else:
                     # need to create new connection here
