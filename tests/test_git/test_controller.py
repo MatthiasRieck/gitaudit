@@ -68,7 +68,66 @@ class TestGit(TestCase):
     def test_fetch(self):
         self.append_process_return_text()
         Git('', '').fetch()
-        self.assert_git_called_with_args('fetch', '--tags', '--force', '-q')
+        self.assert_git_called_with_args(
+            'fetch', '--tags', '--force', '-q', "--no-recurse-submodules")
+
+    def test_gc(self):
+        self.append_process_return_text()
+        Git('', '').gc('prune')
+        self.assert_git_called_with_args('gc', 'prune')
+
+    def test_pull(self):
+        self.append_process_return_text()
+        Git('', '').pull()
+        self.assert_git_called_with_args("pull", "--no-recurse-submodules")
+
+    def test_checkout(self):
+        self.append_process_return_text()
+        Git('', '').checkout('main')
+        self.assert_git_called_with_args(
+            "checkout", "--no-recurse-submodules", "main")
+
+    def test_checkout_create(self):
+        self.append_process_return_text()
+        Git('', '').checkout('main', create_branch=True)
+        self.assert_git_called_with_args(
+            "checkout", "--no-recurse-submodules", "-b", "main")
+
+    def test_push_default_remote(self):
+        self.append_process_return_text()
+        Git('', '').push('main')
+        self.assert_git_called_with_args(
+            "push", "origin", "main:main")
+
+    def test_push_custom_remote(self):
+        self.append_process_return_text()
+        Git('', '').push('main', remote="upstream")
+        self.assert_git_called_with_args(
+            "push", "upstream", "main:main")
+
+    def test_add(self):
+        self.append_process_return_text()
+        Git('', '').add('my/path/to/file.txt')
+        self.assert_git_called_with_args(
+            "add", "my/path/to/file.txt")
+
+    def test_commit(self):
+        self.append_process_return_text()
+        Git('', '').commit('my message')
+        self.assert_git_called_with_args(
+            "commit", "-m", "my message")
+
+    def test_commit_body(self):
+        self.append_process_return_text()
+        Git('', '').commit('my message', body="my body")
+        self.assert_git_called_with_args(
+            "commit", "-m", "my message", "-m", "my body")
+
+    def test_commit_allow_empty(self):
+        self.append_process_return_text()
+        Git('', '').commit('my message', body="my body", allow_empty=True)
+        self.assert_git_called_with_args(
+            "commit", "--allow-empty", "-m", "my message", "-m", "my body")
 
     def test_rev_parse(self):
         self.append_process_return_text(
