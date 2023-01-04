@@ -137,7 +137,66 @@ class Git:
         Returns:
             str: git output of the fetch command
         """
-        return self._execute_git_cmd("fetch", "--tags", "--force", "-q")
+        return self._execute_git_cmd("fetch", "--tags", "--force", "-q", "--no-recurse-submodules")
+
+    def gc(self, *options):  # pylint: disable=invalid-name
+        """Cleanup unnecessary files and update the local repository
+        """
+        self._execute_git_cmd("gc", *options)
+
+    def pull(self):
+        """Execute git pull
+        """
+        self._execute_git_cmd("pull", "--no-recurse-submodules")
+
+    def checkout(self, ref: str, create_branch: bool = False):
+        """Git checkout ref
+
+        Args:
+            ref (str): Ref (Branch / Tag / Sha)
+        """
+        args = ["checkout", "--no-recurse-submodules"]
+
+        if create_branch:
+            args.append("-b")
+
+        self._execute_git_cmd(*args, ref)
+
+    def push(self, branch_name: str, remote="origin"):
+        """Execute Git Push
+
+        Args:
+            branch_name (str): Name of the branch
+            remote (str, optional): Name of the remote. Defaults to "origin".
+        """
+        self._execute_git_cmd("push", remote, f"{branch_name}:{branch_name}")
+
+    def add(self, path: str):
+        """Execute git add
+
+        Args:
+            path (str): the path to the file to the staged (relative).
+                "." for all.
+        """
+        self._execute_git_cmd("add", path)
+
+    def commit(self, subject: str, body: str = None, allow_empty: bool = False):
+        """Execute Git Commit
+
+        Args:
+            subject (str): Subject / Title / Headline of the commit
+            body (str, optional): The body of the commit message. Defaults to None.
+            allow_empty (bool, optional): Set true if empty commits shall be allowed.
+                Defaults to False.
+        """
+        args = []
+        if allow_empty:
+            args.append("--allow-empty")
+        args.extend(["-m", subject])
+        if body:
+            args.extend(["-m", body])
+
+        self._execute_git_cmd("commit", *args)
 
     def rev_parse(self, *args: "list[str]"):
         """Execute rev parse. By default will execute "git rev-parse HEAD"
