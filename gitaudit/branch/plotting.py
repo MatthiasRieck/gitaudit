@@ -60,14 +60,16 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
     """Class for plotting a branching tree
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
             self,
             tree: Tree,
+            column_spacing: float = 200.0,
             show_commit_callback=None,
             sha_svg_append_callback=None,
             ref_name_formatting_callback=None,
     ) -> None:
         self.tree = tree
+        self.column_spacing = column_spacing
         self.end_sha_seg_map = {
             seg.end_sha: seg for seg in self.tree.flatten_segments()
         }
@@ -225,7 +227,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
         svg.append_child(group_lines)
 
         for index, lane in enumerate(self.lanes):
-            lxpos = index*200
+            lxpos = index*self.column_spacing
             lypos = -10
             if self.ref_name_formatting_callback:
                 elem = self.ref_name_formatting_callback(lane.ref_name)
@@ -263,8 +265,8 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
             if item.id in from_ids:
                 connect = from_ids[item.id]
-                _, to_ypos = id_locations[connect.to_id]
-                curr_offset = max(curr_offset, to_ypos + 20)
+                _, to_ypos, to_offset = id_locations[connect.to_id]
+                curr_offset = max(curr_offset, to_ypos + to_offset + 20)
 
             lane_offset = max(
                 curr_offset,
@@ -274,9 +276,8 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
             curr_offset_date = item.date_time
 
-            xpos = lane_index*200
+            xpos = lane_index*self.column_spacing
             ypos = lane_offset
-            id_locations[item.id] = (xpos, ypos)
 
             if lane.ref_name in lane_prev_pos:
                 group_lines.append_child(Path(
@@ -320,15 +321,16 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
                     offset += bnds[3]-bnds[2] + 10
 
             lane_progess_map[lane.ref_name] = lane_offset + offset
+            id_locations[item.id] = (xpos, ypos, offset)
 
         for connection in self.connections:
-            pos_from = id_locations[connection.from_id]
-            pos_to = id_locations[connection.to_id]
+            f_x, f_y, _ = id_locations[connection.from_id]
+            t_x, t_y, _ = id_locations[connection.to_id]
             group_lines.append_child(Path(
                 points=[
-                    pos_from,
-                    (pos_to[0], pos_from[1]),
-                    pos_to,
+                    (f_x, f_y),
+                    (t_x, f_y),
+                    (t_x, t_y),
                 ],
                 corner_radius=8,
             ))
