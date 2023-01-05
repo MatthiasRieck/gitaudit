@@ -291,7 +291,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
             text = Text(
                 xpos + 15,
                 ypos,
-                item.item.sha[0:7],
+                f"{item.item.sha[0:7]} ({item.item.commit_date.date().isoformat()})",
                 horizontal_alignment=HorizontalAlignment.LEFT,
                 font_family='monospace',
             )
