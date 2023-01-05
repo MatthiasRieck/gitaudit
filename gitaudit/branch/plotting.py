@@ -201,7 +201,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
         """
         self._create_lanes()
 
-        lane_progess_map = {}
+        lane_progess_map = {x.ref_name: 30 for x in self.lanes}
         # lane_datetime_map = {}
         lane_initial_datetime_map = {
             x.ref_name: x.items[0].date_time for x in self.lanes
