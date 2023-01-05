@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="449.3" height="216.5" viewBox="-19.20 -26.00 449.30 216.50">
+<svg xmlns="http://www.w3.org/2000/svg" width="574.1" height="216.5" viewBox="-19.20 -26.00 574.10 216.50">
   <g>
     <path d="M 200.00 0.00 L 200.00 30.00" stroke="black" stroke-width="1px" fill="transparent"></path>
     <path d="M 0.00 0.00 L 0.00 80.00" stroke="black" stroke-width="1px" fill="transparent"></path>
@@ -12,18 +12,18 @@
   <text x="200.0" y="-10" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">branch</text>
   <text x="400.0" y="-10" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">hotfix</text>
   <circle cx="200.0" cy="30.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
-  <rect x="210.0" y="20.0" width="29.19999999999999" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
-  <text x="215.0" y="30.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">ab</text>
+  <rect x="210.0" y="20.0" width="154.0" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+  <text x="215.0" y="30.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">ab (2022-01-05)</text>
   <circle cx="0.0" cy="80.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
-  <rect x="10.0" y="70.0" width="19.6" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
-  <text x="15.0" y="80.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">d</text>
+  <rect x="10.0" y="70.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+  <text x="15.0" y="80.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">d (2022-01-04)</text>
   <circle cx="400.0" cy="80.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
-  <rect x="410.0" y="70.0" width="19.600000000000023" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
-  <text x="415.0" y="80.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">4</text>
+  <rect x="410.0" y="70.0" width="144.39999999999998" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+  <text x="415.0" y="80.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">4 (2022-01-04)</text>
   <circle cx="200.0" cy="130.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
-  <rect x="210.0" y="120.0" width="19.599999999999994" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
-  <text x="215.0" y="130.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">e</text>
+  <rect x="210.0" y="120.0" width="144.39999999999998" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+  <text x="215.0" y="130.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">e (2022-01-03)</text>
   <circle cx="0.0" cy="180.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
-  <rect x="10.0" y="170.0" width="19.6" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
-  <text x="15.0" y="180.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">b</text>
+  <rect x="10.0" y="170.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+  <text x="15.0" y="180.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">b (2022-01-02)</text>
 </svg>
