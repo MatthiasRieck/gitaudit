@@ -26,7 +26,7 @@ class TreeLaneItem(BaseModel):
     """
     id: str
     date_time: datetime
-    item: ChangeLogEntry
+    entry: ChangeLogEntry
 
 
 class TreeConnection(BaseModel):
@@ -155,7 +155,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
             lane.append_item(TreeLaneItem(
                 id=segment.end_entry.sha,
                 date_time=segment.end_entry.commit_date,
-                item=segment.end_entry,
+                entry=segment.end_entry,
             ))
 
             if self.show_commit_callback:
@@ -164,7 +164,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
                         lane.append_item(TreeLaneItem(
                             id=entry.sha,
                             date_time=entry.commit_date,
-                            item=entry,
+                            entry=entry,
                         ))
 
             if segment.start_entry.parent_shas:
@@ -200,7 +200,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
         text = Text(
             xpos + 15,
             ypos,
-            f"{item.item.sha[0:7]} ({item.item.commit_date.date().isoformat()})",
+            f"{item.entry.sha[0:7]} ({item.entry.commit_date.date().isoformat()})",
             horizontal_alignment=HorizontalAlignment.LEFT,
             font_family='monospace',
         )
@@ -214,7 +214,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
         offset = 0
         if self.sha_svg_append_callback:
-            elems = self.sha_svg_append_callback(item.item)
+            elems = self.sha_svg_append_callback(item.entry)
 
             offset = text_height/2 + 2 + 10
             for elem in elems:
