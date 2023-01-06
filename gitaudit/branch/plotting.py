@@ -242,14 +242,14 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
                     dy=lypos - bnds[3],
                 )
             )
-        else:
-            return Text(
-                lxpos,
-                lypos,
-                lane.ref_name,
-                vertical_alignment=VerticalAlignment.BOTTOM,
-                font_family='monospace',
-            )
+
+        return Text(
+            lxpos,
+            lypos,
+            lane.ref_name,
+            vertical_alignment=VerticalAlignment.BOTTOM,
+            font_family='monospace',
+        )
 
     def create_svg(self) -> Svg:  # pylint: disable=too-many-locals, too-many-statements
         """Creates Svg object out of tree information
@@ -292,6 +292,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
         from_ids = {x.from_id: x for x in self.connections}
 
+        # plot items
         for item in sorted_items:
             lane = self.id_lane_map[item.id]
             lane_index = self.lanes.index(lane)
@@ -338,15 +339,12 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
             lane_progess_map[lane.ref_name] = lane_offset + offset
             id_locations[item.id] = (xpos, ypos, offset)
 
+        # plot connections
         for connection in self.connections:
             f_x, f_y, _ = id_locations[connection.from_id]
             t_x, t_y, _ = id_locations[connection.to_id]
             group_lines.append_child(Path(
-                points=[
-                    (f_x, f_y),
-                    (t_x, f_y),
-                    (t_x, t_y),
-                ],
+                points=[(f_x, f_y), (t_x, f_y), (t_x, t_y)],
                 corner_radius=8,
             ))
 
