@@ -231,6 +231,26 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
         return return_elems, offset
 
+    def _create_lane_head_svg_element(self, lxpos, lypos, lane):
+        if self.ref_name_formatting_callback:
+            elem = self.ref_name_formatting_callback(lane.ref_name)
+            bnds = elem.bounds
+            return Group(
+                elem,
+                transforms=TranslateTransform(
+                    dx=lxpos - (bnds[0]+bnds[1]) / 2.0,
+                    dy=lypos - bnds[3],
+                )
+            )
+        else:
+            return Text(
+                lxpos,
+                lypos,
+                lane.ref_name,
+                vertical_alignment=VerticalAlignment.BOTTOM,
+                font_family='monospace',
+            )
+
     def create_svg(self) -> Svg:  # pylint: disable=too-many-locals, too-many-statements
         """Creates Svg object out of tree information
 
@@ -267,24 +287,8 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
         for index, lane in enumerate(self.lanes):
             lxpos = index*self.column_spacing
             lypos = -10
-            if self.ref_name_formatting_callback:
-                elem = self.ref_name_formatting_callback(lane.ref_name)
-                bnds = elem.bounds
-                svg.append_child(Group(
-                    elem,
-                    transforms=TranslateTransform(
-                        dx=lxpos - (bnds[0]+bnds[1]) / 2.0,
-                        dy=lypos - bnds[3],
-                    )
-                ))
-            else:
-                svg.append_child(Text(
-                    lxpos,
-                    lypos,
-                    lane.ref_name,
-                    vertical_alignment=VerticalAlignment.BOTTOM,
-                    font_family='monospace',
-                ))
+            svg.append_child(
+                self._create_lane_head_svg_element(lxpos, lypos, lane))
 
         from_ids = {x.from_id: x for x in self.connections}
 
