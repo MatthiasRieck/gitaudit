@@ -6,7 +6,7 @@ from gitaudit.git.change_log_entry import ChangeLogEntry
 from tests.test_custom_assert import assert_equal_svg
 from svgdiagram.elements.circle import Circle
 from svgdiagram.elements.group import Group
-from svgdiagram.elements.text import Text
+from svgdiagram.elements.multi_line_text import MultiLineText
 
 
 def get_hier_log(data):
@@ -208,9 +208,10 @@ class TestTreePlot(TestCase):
 
         plot = TreePlot(
             tree,
-            ref_name_formatting_callback=lambda x: Group([
+            ref_name_formatting_callback=lambda ref_name, head_entry: Group([
                 Circle(0, 0, 40),
-                Text(0, 0, x),
+                MultiLineText.from_text(
+                    0, 0, f"{ref_name}\n({head_entry.sha[0:7]})"),
             ]),
         )
 
