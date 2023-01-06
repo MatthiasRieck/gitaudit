@@ -195,12 +195,12 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
             self.lanes.append(lane)
 
-    def _create_commit_svg_element(self, xpos, ypos, item):
+    def _create_commit_svg_element(self, xpos: float, ypos: float, entry: ChangeLogEntry):
         return_elems = []
         text = Text(
             xpos + 15,
             ypos,
-            f"{item.entry.sha[0:7]} ({item.entry.commit_date.date().isoformat()})",
+            f"{entry.sha[0:7]} ({entry.commit_date.date().isoformat()})",
             horizontal_alignment=HorizontalAlignment.LEFT,
             font_family='monospace',
         )
@@ -214,7 +214,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
         offset = 0
         if self.sha_svg_append_callback:
-            elems = self.sha_svg_append_callback(item.entry)
+            elems = self.sha_svg_append_callback(entry)
 
             offset = text_height/2 + 2 + 10
             for elem in elems:
@@ -333,7 +333,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
             lane_prev_pos[lane.ref_name] = (xpos, ypos)
 
             return_elems, offset = self._create_commit_svg_element(
-                xpos, ypos, item)
+                xpos, ypos, item.entry)
             svg.extend_childs(return_elems)
 
             lane_progess_map[lane.ref_name] = lane_offset + offset
