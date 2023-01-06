@@ -63,12 +63,14 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
     def __init__(  # pylint: disable=too-many-arguments
             self,
             tree: Tree,
+            active_refs: List[str] = None,
             column_spacing: float = 200.0,
             show_commit_callback=None,
             sha_svg_append_callback=None,
             ref_name_formatting_callback=None,
     ) -> None:
         self.tree = tree
+        self.active_refs = active_refs if active_refs else []
         self.column_spacing = column_spacing
         self.end_sha_seg_map = {
             seg.end_sha: seg for seg in self.tree.flatten_segments()
@@ -193,6 +195,62 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
             self.lanes.append(lane)
 
+    def _create_commit_svg_element(self, xpos, ypos, item):
+        return_elems = []
+        text = Text(
+            xpos + 15,
+            ypos,
+            f"{item.item.sha[0:7]} ({item.item.commit_date.date().isoformat()})",
+            horizontal_alignment=HorizontalAlignment.LEFT,
+            font_family='monospace',
+        )
+        text_bounds = text.bounds
+        text_width, text_height = text_bounds[1] - \
+            text_bounds[0], text_bounds[3]-text_bounds[2]
+        return_elems.append(Circle(xpos, ypos, 5))
+        return_elems.append(Rect(xpos + 10, ypos - text_height/2-2, text_width+10,
+                                 text_height+4, rx=8, ry=8, stroke="transparent"))
+        return_elems.append(text)
+
+        offset = 0
+        if self.sha_svg_append_callback:
+            elems = self.sha_svg_append_callback(item.item)
+
+            offset = text_height/2 + 2 + 10
+            for elem in elems:
+                bnds = elem.bounds
+                return_elems.append(Group(
+                    elem,
+                    transforms=TranslateTransform(
+                        dx=xpos - bnds[0] + 10,
+                        dy=ypos - bnds[2] + offset,
+                    ),
+                ))
+
+                offset += bnds[3]-bnds[2] + 10
+
+        return return_elems, offset
+
+    def _create_lane_head_svg_element(self, lxpos, lypos, lane):
+        if self.ref_name_formatting_callback:
+            elem = self.ref_name_formatting_callback(lane.ref_name)
+            bnds = elem.bounds
+            return Group(
+                elem,
+                transforms=TranslateTransform(
+                    dx=lxpos - (bnds[0]+bnds[1]) / 2.0,
+                    dy=lypos - bnds[3],
+                )
+            )
+
+        return Text(
+            lxpos,
+            lypos,
+            lane.ref_name,
+            vertical_alignment=VerticalAlignment.BOTTOM,
+            font_family='monospace',
+        )
+
     def create_svg(self) -> Svg:  # pylint: disable=too-many-locals, too-many-statements
         """Creates Svg object out of tree information
 
@@ -229,27 +287,12 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
         for index, lane in enumerate(self.lanes):
             lxpos = index*self.column_spacing
             lypos = -10
-            if self.ref_name_formatting_callback:
-                elem = self.ref_name_formatting_callback(lane.ref_name)
-                bnds = elem.bounds
-                svg.append_child(Group(
-                    elem,
-                    transforms=TranslateTransform(
-                        dx=lxpos - (bnds[0]+bnds[1]) / 2.0,
-                        dy=lypos - bnds[3],
-                    )
-                ))
-            else:
-                svg.append_child(Text(
-                    lxpos,
-                    lypos,
-                    lane.ref_name,
-                    vertical_alignment=VerticalAlignment.BOTTOM,
-                    font_family='monospace',
-                ))
+            svg.append_child(
+                self._create_lane_head_svg_element(lxpos, lypos, lane))
 
         from_ids = {x.from_id: x for x in self.connections}
 
+        # plot items
         for item in sorted_items:
             lane = self.id_lane_map[item.id]
             lane_index = self.lanes.index(lane)
@@ -288,50 +331,20 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
                     points=[(xpos, 0), (xpos, ypos)]
                 ))
             lane_prev_pos[lane.ref_name] = (xpos, ypos)
-            text = Text(
-                xpos + 15,
-                ypos,
-                f"{item.item.sha[0:7]} ({item.item.commit_date.date().isoformat()})",
-                horizontal_alignment=HorizontalAlignment.LEFT,
-                font_family='monospace',
-            )
-            text_bounds = text.bounds
-            text_width, text_height = text_bounds[1] - \
-                text_bounds[0], text_bounds[3]-text_bounds[2]
-            svg.append_child(Circle(xpos, ypos, 5))
-            svg.append_child(Rect(xpos + 10, ypos - text_height/2-2, text_width+10,
-                             text_height+4, rx=8, ry=8, stroke="transparent"))
-            svg.append_child(text)
 
-            offset = 0
-            if self.sha_svg_append_callback:
-                elems = self.sha_svg_append_callback(item.item)
-
-                offset = text_height/2 + 2 + 10
-                for elem in elems:
-                    bnds = elem.bounds
-                    svg.append_child(Group(
-                        elem,
-                        transforms=TranslateTransform(
-                            dx=xpos - bnds[0] + 10,
-                            dy=ypos - bnds[2] + offset,
-                        ),
-                    ))
-
-                    offset += bnds[3]-bnds[2] + 10
+            return_elems, offset = self._create_commit_svg_element(
+                xpos, ypos, item)
+            svg.extend_childs(return_elems)
 
             lane_progess_map[lane.ref_name] = lane_offset + offset
             id_locations[item.id] = (xpos, ypos, offset)
 
+        # plot connections
         for connection in self.connections:
             f_x, f_y, _ = id_locations[connection.from_id]
             t_x, t_y, _ = id_locations[connection.to_id]
             group_lines.append_child(Path(
-                points=[
-                    (f_x, f_y),
-                    (t_x, f_y),
-                    (t_x, t_y),
-                ],
+                points=[(f_x, f_y), (t_x, f_y), (t_x, t_y)],
                 corner_radius=8,
             ))
 
