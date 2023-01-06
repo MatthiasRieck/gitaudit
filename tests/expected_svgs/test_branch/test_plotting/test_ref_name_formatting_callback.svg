@@ -11,19 +11,28 @@
   <g transform="translate(0.0, -50.5)">
     <g>
       <circle cx="0" cy="0" r="40" stroke="black" stroke-width="1px" fill="white"></circle>
-      <text x="0" y="0" text-anchor="middle" dominant-baseline="central" font-family="arial" font-size="16.0" font-weight="normal">main</text>
+      <g>
+        <text x="0" y="-9.0" text-anchor="middle" dominant-baseline="central" font-family="arial" font-size="16.0" font-weight="normal">main</text>
+        <text x="0" y="9.0" text-anchor="middle" dominant-baseline="central" font-family="arial" font-size="16.0" font-weight="normal">(d)</text>
+      </g>
     </g>
   </g>
   <g transform="translate(200.0, -50.5)">
     <g>
       <circle cx="0" cy="0" r="40" stroke="black" stroke-width="1px" fill="white"></circle>
-      <text x="0" y="0" text-anchor="middle" dominant-baseline="central" font-family="arial" font-size="16.0" font-weight="normal">branch</text>
+      <g>
+        <text x="0" y="-9.0" text-anchor="middle" dominant-baseline="central" font-family="arial" font-size="16.0" font-weight="normal">branch</text>
+        <text x="0" y="9.0" text-anchor="middle" dominant-baseline="central" font-family="arial" font-size="16.0" font-weight="normal">(ab)</text>
+      </g>
     </g>
   </g>
   <g transform="translate(400.0, -50.5)">
     <g>
       <circle cx="0" cy="0" r="40" stroke="black" stroke-width="1px" fill="white"></circle>
-      <text x="0" y="0" text-anchor="middle" dominant-baseline="central" font-family="arial" font-size="16.0" font-weight="normal">hotfix</text>
+      <g>
+        <text x="0" y="-9.0" text-anchor="middle" dominant-baseline="central" font-family="arial" font-size="16.0" font-weight="normal">hotfix</text>
+        <text x="0" y="9.0" text-anchor="middle" dominant-baseline="central" font-family="arial" font-size="16.0" font-weight="normal">(4)</text>
+      </g>
     </g>
   </g>
   <circle cx="200.0" cy="30.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>

@@ -231,22 +231,23 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
         return return_elems, offset
 
-    def _create_lane_head_svg_element(self, lxpos, lypos, lane):
+    def _create_lane_head_svg_element(self, xpos: float, ypos: float, lane: TreeLane):
         if self.ref_name_formatting_callback:
-            elem = self.ref_name_formatting_callback(lane.ref_name)
+            elem = self.ref_name_formatting_callback(
+                lane.ref_name,
+                lane.items[0].entry,
+            )
             bnds = elem.bounds
             return Group(
                 elem,
                 transforms=TranslateTransform(
-                    dx=lxpos - (bnds[0]+bnds[1]) / 2.0,
-                    dy=lypos - bnds[3],
+                    dx=xpos - (bnds[0]+bnds[1]) / 2.0,
+                    dy=ypos - bnds[3],
                 )
             )
 
         return Text(
-            lxpos,
-            lypos,
-            lane.ref_name,
+            xpos, ypos, lane.ref_name,
             vertical_alignment=VerticalAlignment.BOTTOM,
             font_family='monospace',
         )
