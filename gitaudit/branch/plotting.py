@@ -69,6 +69,7 @@ class TreeLane:  # pylint: disable=too-few-public-methods
 
         self.xpos = xpos
         self.extend_to_top = extend_to_top
+        self.ref_svg = None
 
     def append_item(self, item: TreeLaneItem):
         """Append tree lane item
@@ -249,6 +250,20 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
 
             item.commit_text_svg = Group([rect, text])
 
+    def _create_lane_ref_svg_elems(self):
+        for lane in self.lanes:
+            if self.ref_name_formatting_callback:
+                lane.ref_svg = self.ref_name_formatting_callback(
+                    lane.ref_name,
+                    lane.items[0].entry,
+                )
+            else:
+                lane.ref_svg = Text(
+                    0, 0, lane.ref_name,
+                    vertical_alignment=VerticalAlignment.BOTTOM,
+                    font_family='monospace',
+                )
+
     def _create_commit_svg_element(self, xpos: float, ypos: float, item: TreeLaneItem):
         return_elems = []
 
@@ -286,27 +301,6 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
             offset += bnds[3]-bnds[2] + 10
 
         return return_elems
-
-    def _create_lane_head_svg_element(self, ypos: float, lane: TreeLane):
-        if self.ref_name_formatting_callback:
-            elem = self.ref_name_formatting_callback(
-                lane.ref_name,
-                lane.items[0].entry,
-            )
-            bnds = elem.bounds
-            return Group(
-                elem,
-                transforms=TranslateTransform(
-                    dx=lane.xpos - (bnds[0]+bnds[1]) / 2.0,
-                    dy=ypos - bnds[3],
-                )
-            )
-
-        return Text(
-            lane.xpos, ypos, lane.ref_name,
-            vertical_alignment=VerticalAlignment.BOTTOM,
-            font_family='monospace',
-        )
 
     def _calculate_positions(self):  # pylint: disable=too-many-locals
         lane_progess_map = {}
@@ -363,11 +357,18 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
     def _render_lanes(self):
         for lane in self.lanes:
             if lane.ref_name in self.active_refs:
-                lypos = -10
+                ypos = -10
             else:
-                lypos = lane.items[0].ypos-10
-            self.append_child(
-                self._create_lane_head_svg_element(lypos, lane))
+                ypos = lane.items[0].ypos-10
+
+            bnds = lane.ref_svg.bounds
+            self.append_child(Group(
+                lane.ref_svg,
+                transforms=TranslateTransform(
+                    dx=lane.xpos - (bnds[0]+bnds[1]) / 2.0,
+                    dy=ypos - bnds[3],
+                )
+            ))
 
     def _render_positions(self):
         for item in self._sorted_items():
@@ -413,6 +414,7 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
             Svg: Svg Object
         """
         self._create_lanes()
+        self._create_lane_ref_svg_elems()
         self._create_commit_svg_elems()
         self._calculate_positions()
         self._render_lanes()

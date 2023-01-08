@@ -12,9 +12,15 @@
     <path d="M 0.00 408.00 L 192.00 408.00 A 8.00 8.00 0 0 0 200.00 400.00 L 200.00 306.00" stroke="black" stroke-width="1px" fill="transparent"></path>
     <path d="M 200.00 214.00 L 392.00 214.00 A 8.00 8.00 0 0 0 400.00 206.00 L 400.00 80.00" stroke="black" stroke-width="1px" fill="transparent"></path>
   </g>
-  <text x="0.0" y="-10" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">main</text>
-  <text x="200.0" y="-10" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">branch</text>
-  <text x="400.0" y="-10" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">hotfix</text>
+  <g transform="translate(0.0, -10.0)">
+    <text x="0" y="0" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">main</text>
+  </g>
+  <g transform="translate(200.0, -10.0)">
+    <text x="0" y="0" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">branch</text>
+  </g>
+  <g transform="translate(400.0, -10.0)">
+    <text x="0" y="0" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">hotfix</text>
+  </g>
   <g transform="translate(200.0, 30.0)">
     <circle cx="0" cy="0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
