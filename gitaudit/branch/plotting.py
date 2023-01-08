@@ -28,6 +28,8 @@ class TreeLaneItem:
     entry: ChangeLogEntry
     ypos: Optional[float] = None
     offset: Optional[float] = None
+    commit_text_svg: Optional[SvgElement] = None
+    commit_circle_svg: Optional[SvgElement] = None
     svgs: List[SvgElement] = field(default_factory=list)
 
     @property
@@ -113,7 +115,7 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
         self.group_lines = Group()
         self.append_child(self.group_lines)
 
-    def _sorted_items(self):
+    def _sorted_items(self) -> List[TreeLaneItem]:
         return sorted(
             self.id_item_map.values(),
             key=lambda x: x.date_time,
@@ -219,24 +221,50 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
 
             self.lanes.append(lane)
 
+    def _create_commit_svg_elems(self):
+        for item in self._sorted_items():
+            if self.sha_svg_append_callback:
+                item.svgs = self.sha_svg_append_callback(item.entry)
+
+            item.commit_circle_svg = Circle(0, 0, 5)
+
+            text = Text(
+                15,
+                0,
+                f"{item.entry.sha[0:7]} ({item.entry.commit_date.date().isoformat()})",
+                horizontal_alignment=HorizontalAlignment.LEFT,
+                font_family='monospace',
+            )
+            text_width, text_height = text.size
+            rect = Rect(10, - text_height/2-2, text_width+10,
+                        text_height+4, rx=8, ry=8, stroke="transparent")
+
+            item.commit_text_svg = Group([rect, text])
+
     def _create_commit_svg_element(self, xpos: float, ypos: float, item: TreeLaneItem):
         return_elems = []
-        text = Text(
-            xpos + 15,
-            ypos,
-            f"{item.entry.sha[0:7]} ({item.entry.commit_date.date().isoformat()})",
-            horizontal_alignment=HorizontalAlignment.LEFT,
-            font_family='monospace',
-        )
-        text_bounds = text.bounds
-        text_width, text_height = text_bounds[1] - \
-            text_bounds[0], text_bounds[3]-text_bounds[2]
-        return_elems.append(Circle(xpos, ypos, 5))
-        return_elems.append(Rect(xpos + 10, ypos - text_height/2-2, text_width+10,
-                                 text_height+4, rx=8, ry=8, stroke="transparent"))
-        return_elems.append(text)
 
-        offset = text_height/2 + 2 + 10
+        _, text_height = item.commit_text_svg.size
+        _, circle_height = item.commit_circle_svg.size
+
+        commit_height = max(text_height, circle_height)
+
+        return_elems.append(Group(
+            item.commit_circle_svg,
+            transforms=TranslateTransform(
+                dx=xpos,
+                dy=ypos,
+            ),
+        ))
+        return_elems.append(Group(
+            item.commit_text_svg,
+            transforms=TranslateTransform(
+                dx=xpos,
+                dy=ypos,
+            ),
+        ))
+
+        offset = commit_height/2 + 2 + 10
         for elem in item.svgs:
             bnds = elem.bounds
             return_elems.append(Group(
@@ -313,9 +341,7 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
             )
 
             offset = 0
-            if self.sha_svg_append_callback:
-                item.svgs = self.sha_svg_append_callback(item.entry)
-
+            if item.svgs:
                 offset = 20
                 for elem in item.svgs:
                     bnds = elem.bounds
@@ -374,6 +400,7 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
             Svg: Svg Object
         """
         self._create_lanes()
+        self._create_commit_svg_elems()
         self._calculate_positions()
         self._render_lanes()
         self._render_positions()
