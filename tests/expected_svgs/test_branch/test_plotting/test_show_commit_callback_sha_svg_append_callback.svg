@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="574.1" height="598.0" viewBox="-19.20 -26.00 574.10 598.00">
+<svg xmlns="http://www.w3.org/2000/svg" width="574.1" height="600.5" viewBox="-19.20 -26.00 574.10 600.50">
   <g>
     <path d="M 200.00 0.00 L 200.00 30.00" stroke="black" stroke-width="1px" fill="transparent"></path>
     <path d="M 0.00 0.00 L 0.00 80.00" stroke="black" stroke-width="1px" fill="transparent"></path>
@@ -15,85 +15,139 @@
   <text x="0.0" y="-10" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">main</text>
   <text x="200.0" y="-10" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">branch</text>
   <text x="400.0" y="-10" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">hotfix</text>
-  <circle cx="200.0" cy="30.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
-  <rect x="210.0" y="20.0" width="154.0" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
-  <text x="215.0" y="30.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">ab (2022-01-05)</text>
-  <g transform="translate(220.5, 60.5)">
+  <g transform="translate(200.0, 30.0)">
+    <circle cx="0" cy="0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
+  </g>
+  <g transform="translate(200.0, 30.0)">
+    <g>
+      <rect x="10" y="-10.0" width="154.0" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">ab (2022-01-05)</text>
+    </g>
+  </g>
+  <g transform="translate(220.5, 63.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <g transform="translate(220.5, 91.5)">
+  <g transform="translate(220.5, 94.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <circle cx="0.0" cy="80.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
-  <rect x="10.0" y="70.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
-  <text x="15.0" y="80.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">d (2022-01-04)</text>
-  <g transform="translate(20.5, 110.5)">
+  <g transform="translate(0.0, 80.0)">
+    <circle cx="0" cy="0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
+  </g>
+  <g transform="translate(0.0, 80.0)">
+    <g>
+      <rect x="10" y="-10.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">d (2022-01-04)</text>
+    </g>
+  </g>
+  <g transform="translate(20.5, 113.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <g transform="translate(20.5, 141.5)">
+  <g transform="translate(20.5, 144.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <circle cx="200.0" cy="122.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
-  <rect x="210.0" y="112.0" width="144.39999999999998" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
-  <text x="215.0" y="122.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">f (2022-01-04)</text>
-  <g transform="translate(220.5, 152.5)">
+  <g transform="translate(200.0, 122.0)">
+    <circle cx="0" cy="0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
+  </g>
+  <g transform="translate(200.0, 122.0)">
+    <g>
+      <rect x="10" y="-10.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">f (2022-01-04)</text>
+    </g>
+  </g>
+  <g transform="translate(220.5, 155.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <g transform="translate(220.5, 183.5)">
+  <g transform="translate(220.5, 186.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <circle cx="400.0" cy="80.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
-  <rect x="410.0" y="70.0" width="144.39999999999998" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
-  <text x="415.0" y="80.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">4 (2022-01-04)</text>
-  <g transform="translate(420.5, 110.5)">
+  <g transform="translate(400.0, 80.0)">
+    <circle cx="0" cy="0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
+  </g>
+  <g transform="translate(400.0, 80.0)">
+    <g>
+      <rect x="10" y="-10.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">4 (2022-01-04)</text>
+    </g>
+  </g>
+  <g transform="translate(420.5, 113.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <g transform="translate(420.5, 141.5)">
+  <g transform="translate(420.5, 144.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <circle cx="0.0" cy="172.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
-  <rect x="10.0" y="162.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
-  <text x="15.0" y="172.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">c (2022-01-03)</text>
-  <g transform="translate(20.5, 202.5)">
+  <g transform="translate(0.0, 172.0)">
+    <circle cx="0" cy="0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
+  </g>
+  <g transform="translate(0.0, 172.0)">
+    <g>
+      <rect x="10" y="-10.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">c (2022-01-03)</text>
+    </g>
+  </g>
+  <g transform="translate(20.5, 205.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <g transform="translate(20.5, 233.5)">
+  <g transform="translate(20.5, 236.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <circle cx="200.0" cy="214.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
-  <rect x="210.0" y="204.0" width="144.39999999999998" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
-  <text x="215.0" y="214.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">e (2022-01-03)</text>
-  <g transform="translate(220.5, 244.5)">
+  <g transform="translate(200.0, 214.0)">
+    <circle cx="0" cy="0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
+  </g>
+  <g transform="translate(200.0, 214.0)">
+    <g>
+      <rect x="10" y="-10.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">e (2022-01-03)</text>
+    </g>
+  </g>
+  <g transform="translate(220.5, 247.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <g transform="translate(220.5, 275.5)">
+  <g transform="translate(220.5, 278.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <circle cx="200.0" cy="306.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
-  <rect x="210.0" y="296.0" width="154.0" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
-  <text x="215.0" y="306.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">34 (2022-01-02)</text>
-  <g transform="translate(220.5, 336.5)">
+  <g transform="translate(200.0, 306.0)">
+    <circle cx="0" cy="0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
+  </g>
+  <g transform="translate(200.0, 306.0)">
+    <g>
+      <rect x="10" y="-10.0" width="154.0" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">34 (2022-01-02)</text>
+    </g>
+  </g>
+  <g transform="translate(220.5, 339.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <g transform="translate(220.5, 367.5)">
+  <g transform="translate(220.5, 370.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <circle cx="0.0" cy="408.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
-  <rect x="10.0" y="398.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
-  <text x="15.0" y="408.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">b (2022-01-02)</text>
-  <g transform="translate(20.5, 438.5)">
+  <g transform="translate(0.0, 408.0)">
+    <circle cx="0" cy="0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
+  </g>
+  <g transform="translate(0.0, 408.0)">
+    <g>
+      <rect x="10" y="-10.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">b (2022-01-02)</text>
+    </g>
+  </g>
+  <g transform="translate(20.5, 441.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <g transform="translate(20.5, 469.5)">
+  <g transform="translate(20.5, 472.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <circle cx="0.0" cy="500.0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
-  <rect x="10.0" y="490.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
-  <text x="15.0" y="500.0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">a (2022-01-01)</text>
-  <g transform="translate(20.5, 530.5)">
+  <g transform="translate(0.0, 500.0)">
+    <circle cx="0" cy="0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
+  </g>
+  <g transform="translate(0.0, 500.0)">
+    <g>
+      <rect x="10" y="-10.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">a (2022-01-01)</text>
+    </g>
+  </g>
+  <g transform="translate(20.5, 533.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <g transform="translate(20.5, 561.5)">
+  <g transform="translate(20.5, 564.0)">
     <circle cx="0" cy="0" r="10" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
 </svg>
