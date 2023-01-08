@@ -106,7 +106,7 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
         self.sha_svg_append_callback = sha_svg_append_callback
         self.ref_name_formatting_callback = ref_name_formatting_callback
 
-        self.lanes = []
+        self.lanes: List[TreeLane] = []
         self.connections = []
         self.laned_segment_end_shas = []
         self.id_item_map = {}
@@ -354,7 +354,10 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
 
     def _render_lanes(self):
         for lane in self.lanes:
-            lypos = -10
+            if lane.ref_name in self.active_refs:
+                lypos = -10
+            else:
+                lypos = lane.items[0].ypos-10
             self.append_child(
                 self._create_lane_head_svg_element(lypos, lane))
 
@@ -376,8 +379,10 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
                             (lane.xpos, item.ypos)]
                 ))
             else:
+                offset = 0 if lane.ref_name in self.active_refs else lane.items[0].ypos
                 self.group_lines.append_child(Path(
-                    points=[(lane.xpos, 0), (lane.xpos, item.ypos)]
+                    points=[(lane.xpos, offset-0),
+                            (lane.xpos, item.ypos)]
                 ))
             lane_prev_pos[lane.ref_name] = (lane.xpos, item.ypos)
 
