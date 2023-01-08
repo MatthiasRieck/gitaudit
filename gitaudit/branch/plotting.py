@@ -1,16 +1,16 @@
 """Plots a Tree
 """
 
-from datetime import datetime, timedelta
-from typing import List, Dict, Tuple
-
-from pydantic import BaseModel
+from datetime import timedelta
+from typing import List, Dict, Tuple, Optional
+from dataclasses import dataclass, field
 
 from svgdiagram.elements.circle import Circle
 from svgdiagram.elements.rect import Rect
 from svgdiagram.elements.group import Group, TranslateTransform
 from svgdiagram.elements.path import Path
 from svgdiagram.elements.svg import Svg
+from svgdiagram.elements.svg_element import SvgElement
 from svgdiagram.elements.text import Text, HorizontalAlignment, VerticalAlignment
 
 from gitaudit.git.change_log_entry import ChangeLogEntry
@@ -21,15 +21,36 @@ SECONDS_IN_DAY = timedelta(days=1).total_seconds()
 MAX_GAP = 50
 
 
-class TreeLaneItem(BaseModel):
+@dataclass
+class TreeLaneItem:
     """TreeLaneItem
     """
-    id: str
-    date_time: datetime
     entry: ChangeLogEntry
+    ypos: Optional[float] = None
+    offset: Optional[float] = None
+    svgs: List[SvgElement] = field(default_factory=list)
+
+    @property
+    def id(self):  # pylint: disable=invalid-name
+        """ID of the tree lane item
+        """
+        return self.entry.sha
+
+    @property
+    def date_time(self):
+        """Date Time of the tree lane item
+        """
+        return self.entry.commit_date
+
+    @property
+    def pos_info(self):
+        """position info of the tree lane item
+        """
+        return self.ypos, self.offset
 
 
-class TreeConnection(BaseModel):
+@dataclass
+class TreeConnection:
     """Tree Connection
     """
     from_id: str
@@ -40,11 +61,11 @@ class TreeLane:  # pylint: disable=too-few-public-methods
     """Tree Lane
     """
 
-    def __init__(self, ref_name: str, pos: float, extend_to_top: bool = True) -> None:
+    def __init__(self, ref_name: str, xpos: float, extend_to_top: bool = True) -> None:
         self.ref_name = ref_name
         self.items = []
 
-        self.pos = pos
+        self.xpos = xpos
         self.extend_to_top = extend_to_top
 
     def append_item(self, item: TreeLaneItem):
@@ -56,7 +77,7 @@ class TreeLane:  # pylint: disable=too-few-public-methods
         self.items.append(item)
 
 
-class TreePlot:  # pylint: disable=too-many-instance-attributes
+class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
     """Class for plotting a branching tree
     """
 
@@ -69,6 +90,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
             sha_svg_append_callback=None,
             ref_name_formatting_callback=None,
     ) -> None:
+        super().__init__()
         self.tree = tree
         self.active_refs = active_refs if active_refs else []
         self.column_spacing = column_spacing
@@ -87,6 +109,16 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
         self.laned_segment_end_shas = []
         self.id_item_map = {}
         self.id_lane_map = {}
+
+        self.group_lines = Group()
+        self.append_child(self.group_lines)
+
+    def _sorted_items(self):
+        return sorted(
+            self.id_item_map.values(),
+            key=lambda x: x.date_time,
+            reverse=True,
+        )
 
     def _get_end_seg_counts(self) -> Dict[str, Tuple[int, int]]:
         """For the given tree return the segment / sha count from each end point to the root
@@ -152,20 +184,12 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
         while segment:
             self.laned_segment_end_shas.append(segment.end_sha)
-            lane.append_item(TreeLaneItem(
-                id=segment.end_entry.sha,
-                date_time=segment.end_entry.commit_date,
-                entry=segment.end_entry,
-            ))
+            lane.append_item(TreeLaneItem(entry=segment.end_entry))
 
             if self.show_commit_callback:
                 for entry in segment.entries[1:]:
                     if self.show_commit_callback(entry):
-                        lane.append_item(TreeLaneItem(
-                            id=entry.sha,
-                            date_time=entry.commit_date,
-                            entry=entry,
-                        ))
+                        lane.append_item(TreeLaneItem(entry=entry))
 
             if segment.start_entry.parent_shas:
                 new_segment = self.end_sha_seg_map[segment.start_entry.parent_shas[0]]
@@ -231,7 +255,7 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
         return return_elems, offset
 
-    def _create_lane_head_svg_element(self, xpos: float, ypos: float, lane: TreeLane):
+    def _create_lane_head_svg_element(self, ypos: float, lane: TreeLane):
         if self.ref_name_formatting_callback:
             elem = self.ref_name_formatting_callback(
                 lane.ref_name,
@@ -241,16 +265,50 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
             return Group(
                 elem,
                 transforms=TranslateTransform(
-                    dx=xpos - (bnds[0]+bnds[1]) / 2.0,
+                    dx=lane.xpos - (bnds[0]+bnds[1]) / 2.0,
                     dy=ypos - bnds[3],
                 )
             )
 
         return Text(
-            xpos, ypos, lane.ref_name,
+            lane.xpos, ypos, lane.ref_name,
             vertical_alignment=VerticalAlignment.BOTTOM,
             font_family='monospace',
         )
+
+    def _calculate_positions(self):
+        pass
+
+    def _render_positions(self):
+        pass
+
+    def _render_connections(self):
+        lane_prev_pos = {}
+
+        for item in self._sorted_items():
+            lane = self.id_lane_map[item.id]
+            if lane.ref_name in lane_prev_pos:
+                self.group_lines.append_child(Path(
+                    points=[lane_prev_pos[lane.ref_name],
+                            (lane.xpos, item.ypos)]
+                ))
+            else:
+                self.group_lines.append_child(Path(
+                    points=[(lane.xpos, 0), (lane.xpos, item.ypos)]
+                ))
+            lane_prev_pos[lane.ref_name] = (lane.xpos, item.ypos)
+
+        # plot connections
+        for connection in self.connections:
+            f_lane = self.id_lane_map[connection.from_id]
+            f_y, _ = self.id_item_map[connection.from_id].pos_info
+            t_lane = self.id_lane_map[connection.to_id]
+            t_y, _ = self.id_item_map[connection.to_id].pos_info
+            self.group_lines.append_child(Path(
+                points=[(f_lane.xpos, f_y), (t_lane.xpos, f_y),
+                        (t_lane.xpos, t_y)],
+                corner_radius=8,
+            ))
 
     def create_svg(self) -> Svg:  # pylint: disable=too-many-locals, too-many-statements
         """Creates Svg object out of tree information
@@ -261,42 +319,26 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
         self._create_lanes()
 
         lane_progess_map = {}
-        # lane_datetime_map = {}
         lane_initial_datetime_map = {
             x.ref_name: x.items[0].date_time for x in self.lanes
         }
-        lane_prev_pos = {}
 
-        max_datetime = max(lane_initial_datetime_map.values())
-        curr_offset_date = max_datetime
+        curr_offset_date = max(lane_initial_datetime_map.values())
         curr_offset = 30
 
         day_scale = 80
 
-        sorted_items = sorted(
-            self.id_item_map.values(),
-            key=lambda x: x.date_time,
-            reverse=True,
-        )
-
-        id_locations = {}
-
-        svg = Svg()
-        group_lines = Group()
-        svg.append_child(group_lines)
-
         for index, lane in enumerate(self.lanes):
-            lxpos = index*self.column_spacing
+            lane.xpos = index*self.column_spacing
             lypos = -10
-            svg.append_child(
-                self._create_lane_head_svg_element(lxpos, lypos, lane))
+            self.append_child(
+                self._create_lane_head_svg_element(lypos, lane))
 
         from_ids = {x.from_id: x for x in self.connections}
 
         # plot items
-        for item in sorted_items:
+        for item in self._sorted_items():
             lane = self.id_lane_map[item.id]
-            lane_index = self.lanes.index(lane)
 
             days_from_offset = (
                 curr_offset_date-item.date_time
@@ -309,44 +351,24 @@ class TreePlot:  # pylint: disable=too-many-instance-attributes
 
             if item.id in from_ids:
                 connect = from_ids[item.id]
-                _, to_ypos, to_offset = id_locations[connect.to_id]
+                to_ypos, to_offset = self.id_item_map[connect.to_id].pos_info
                 curr_offset = max(curr_offset, to_ypos + to_offset + 20)
 
-            lane_offset = max(
+            item.ypos = max(
                 curr_offset,
                 lane_progess_map[lane.ref_name] +
                 10 if lane.ref_name in lane_progess_map else curr_offset,
             )
 
-            curr_offset_date = item.date_time
-
-            xpos = lane_index*self.column_spacing
-            ypos = lane_offset
-
-            if lane.ref_name in lane_prev_pos:
-                group_lines.append_child(Path(
-                    points=[lane_prev_pos[lane.ref_name], (xpos, ypos)]
-                ))
-            else:
-                group_lines.append_child(Path(
-                    points=[(xpos, 0), (xpos, ypos)]
-                ))
-            lane_prev_pos[lane.ref_name] = (xpos, ypos)
-
             return_elems, offset = self._create_commit_svg_element(
-                xpos, ypos, item.entry)
-            svg.extend_childs(return_elems)
+                lane.xpos, item.ypos, item.entry)
+            item.svgs = return_elems
+            item.offset = offset
+            self.extend_childs(return_elems)
 
-            lane_progess_map[lane.ref_name] = lane_offset + offset
-            id_locations[item.id] = (xpos, ypos, offset)
+            curr_offset_date = item.date_time
+            lane_progess_map[lane.ref_name] = item.ypos + offset
 
-        # plot connections
-        for connection in self.connections:
-            f_x, f_y, _ = id_locations[connection.from_id]
-            t_x, t_y, _ = id_locations[connection.to_id]
-            group_lines.append_child(Path(
-                points=[(f_x, f_y), (t_x, f_y), (t_x, t_y)],
-                corner_radius=8,
-            ))
+        self._render_connections()
 
-        return svg
+        return self
