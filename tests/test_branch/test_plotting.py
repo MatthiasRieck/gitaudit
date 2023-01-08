@@ -119,6 +119,11 @@ class TestTreePlot(TestCase):
 
         assert_equal_svg(plot)
 
+        self.assertEqual(
+            plot.directly_connected_to_root_refs,
+            ['main', 'branch']
+        )
+
     def test_sha_svg_append_callback(self):
         hier_log_root = get_hier_log(NEW_EXAMPLE)
         hier_log_branch = get_hier_log(NEW_EXAMPLE_BRANCH)
@@ -297,3 +302,8 @@ class TestTreePlot(TestCase):
         )
 
         assert_equal_svg(plot)
+
+        self.assertEqual(
+            plot.directly_connected_to_root_refs,
+            ['main', 'branch']
+        )
