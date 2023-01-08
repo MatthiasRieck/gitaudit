@@ -95,6 +95,7 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
         super().__init__()
         self.tree = tree
         self.active_refs = active_refs if active_refs else []
+        self.directly_connected_to_root_refs = []
         self.column_spacing = column_spacing
         self.end_sha_seg_map = {
             seg.end_sha: seg for seg in self.tree.flatten_segments()
@@ -202,10 +203,13 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
                     segment = new_segment
                 else:
                     # need to create new connection here
+                    from_id = segment.start_entry.parent_shas[0]
                     self.connections.append(TreeConnection(
                         to_id=lane.items[-1].id,
-                        from_id=segment.start_entry.parent_shas[0],
+                        from_id=from_id,
                     ))
+                    if self.end_sha_seg_map[from_id].branch_name == self.tree.root.branch_name:
+                        self.directly_connected_to_root_refs.append(ref_name)
                     segment = None
             else:
                 segment = None
@@ -214,6 +218,7 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
 
     def _create_lanes(self) -> None:
         ref_order_names = self.determine_ref_name_order()
+        self.directly_connected_to_root_refs.append(self.tree.root.branch_name)
 
         for index, ref_name in enumerate(ref_order_names):
             lane = self._create_lane(ref_name, index * 300)
