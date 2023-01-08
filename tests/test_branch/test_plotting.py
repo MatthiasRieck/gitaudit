@@ -92,7 +92,7 @@ class TestTreePlot(TestCase):
         tree.append_log(hier_log_branch, 'branch')
         tree.append_log(hier_log_hotfix, 'hotfix')
 
-        plot = TreePlot(tree)
+        plot = TreePlot(tree, active_refs=['main', 'branch', 'hotfix'])
 
         self.assertDictEqual(
             plot._get_end_seg_counts(),
@@ -120,7 +120,11 @@ class TestTreePlot(TestCase):
         tree.append_log(hier_log_hotfix, 'hotfix')
 
         plot = TreePlot(
-            tree, sha_svg_append_callback=lambda _: [Circle(0, 0, 10), Circle(0, 0, 10)])
+            tree,
+            sha_svg_append_callback=lambda _: [
+                Circle(0, 0, 10), Circle(0, 0, 10)],
+            active_refs=['main', 'branch', 'hotfix'],
+        )
 
         self.assertDictEqual(
             plot._get_end_seg_counts(),
@@ -147,7 +151,11 @@ class TestTreePlot(TestCase):
         tree.append_log(hier_log_branch, 'branch')
         tree.append_log(hier_log_hotfix, 'hotfix')
 
-        plot = TreePlot(tree, show_commit_callback=lambda _: True)
+        plot = TreePlot(
+            tree,
+            show_commit_callback=lambda _: True,
+            active_refs=['main', 'branch', 'hotfix'],
+        )
 
         self.assertDictEqual(
             plot._get_end_seg_counts(),
@@ -179,6 +187,7 @@ class TestTreePlot(TestCase):
             show_commit_callback=lambda _: True,
             sha_svg_append_callback=lambda _: [
                 Circle(0, 0, 10), Circle(0, 0, 10)],
+            active_refs=['main', 'branch', 'hotfix'],
         )
 
         self.assertDictEqual(
@@ -213,7 +222,35 @@ class TestTreePlot(TestCase):
                 MultiLineText.from_text(
                     0, 0, f"{ref_name}\n({head_entry.sha[0:7]})"),
             ]),
+            active_refs=['main', 'branch', 'hotfix'],
         )
+
+        self.assertDictEqual(
+            plot._get_end_seg_counts(),
+            {
+                "main": (0, 1, -2),
+                "branch": (172800, 3, -6),
+                "hotfix": (172800, 3, -5),
+            }
+        )
+        self.assertEqual(
+            plot.determine_ref_name_order(),
+            ['main', 'branch', 'hotfix'],
+        )
+
+        assert_equal_svg(plot)
+
+    def test_active_refs(self):
+        hier_log_root = get_hier_log(NEW_EXAMPLE)
+        hier_log_branch = get_hier_log(NEW_EXAMPLE_BRANCH)
+        hier_log_hotfix = get_hier_log(NEW_EXAMPLE_HOTFIX)
+
+        tree = Tree()
+        tree.append_log(hier_log_root, 'main')
+        tree.append_log(hier_log_branch, 'branch')
+        tree.append_log(hier_log_hotfix, 'hotfix')
+
+        plot = TreePlot(tree, active_refs=['main', 'branch'])
 
         self.assertDictEqual(
             plot._get_end_seg_counts(),
