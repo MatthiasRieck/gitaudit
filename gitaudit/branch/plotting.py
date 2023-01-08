@@ -219,12 +219,12 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
 
             self.lanes.append(lane)
 
-    def _create_commit_svg_element(self, xpos: float, ypos: float, entry: ChangeLogEntry):
+    def _create_commit_svg_element(self, xpos: float, ypos: float, item: TreeLaneItem):
         return_elems = []
         text = Text(
             xpos + 15,
             ypos,
-            f"{entry.sha[0:7]} ({entry.commit_date.date().isoformat()})",
+            f"{item.entry.sha[0:7]} ({item.entry.commit_date.date().isoformat()})",
             horizontal_alignment=HorizontalAlignment.LEFT,
             font_family='monospace',
         )
@@ -236,24 +236,20 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
                                  text_height+4, rx=8, ry=8, stroke="transparent"))
         return_elems.append(text)
 
-        offset = 0
-        if self.sha_svg_append_callback:
-            elems = self.sha_svg_append_callback(entry)
+        offset = text_height/2 + 2 + 10
+        for elem in item.svgs:
+            bnds = elem.bounds
+            return_elems.append(Group(
+                elem,
+                transforms=TranslateTransform(
+                    dx=xpos - bnds[0] + 10,
+                    dy=ypos - bnds[2] + offset,
+                ),
+            ))
 
-            offset = text_height/2 + 2 + 10
-            for elem in elems:
-                bnds = elem.bounds
-                return_elems.append(Group(
-                    elem,
-                    transforms=TranslateTransform(
-                        dx=xpos - bnds[0] + 10,
-                        dy=ypos - bnds[2] + offset,
-                    ),
-                ))
+            offset += bnds[3]-bnds[2] + 10
 
-                offset += bnds[3]-bnds[2] + 10
-
-        return return_elems, offset
+        return return_elems
 
     def _create_lane_head_svg_element(self, ypos: float, lane: TreeLane):
         if self.ref_name_formatting_callback:
@@ -276,11 +272,72 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
             font_family='monospace',
         )
 
-    def _calculate_positions(self):
-        pass
+    def _calculate_positions(self):  # pylint: disable=too-many-locals
+        lane_progess_map = {}
+        lane_initial_datetime_map = {
+            x.ref_name: x.items[0].date_time for x in self.lanes
+        }
+
+        curr_offset_date = max(lane_initial_datetime_map.values())
+        curr_offset = 30
+
+        day_scale = 80
+
+        for index, lane in enumerate(self.lanes):
+            lane.xpos = index*self.column_spacing
+
+        from_ids = {x.from_id: x for x in self.connections}
+
+        # plot items
+        for item in self._sorted_items():
+            lane = self.id_lane_map[item.id]
+
+            days_from_offset = (
+                curr_offset_date-item.date_time
+            ).total_seconds() / SECONDS_IN_DAY
+            delta_offset = day_scale*days_from_offset
+
+            delta_offset = min(delta_offset, MAX_GAP)
+
+            curr_offset = curr_offset + delta_offset
+
+            if item.id in from_ids:
+                connect = from_ids[item.id]
+                to_ypos, to_offset = self.id_item_map[connect.to_id].pos_info
+                curr_offset = max(curr_offset, to_ypos + to_offset + 20)
+
+            item.ypos = max(
+                curr_offset,
+                lane_progess_map[lane.ref_name] +
+                10 if lane.ref_name in lane_progess_map else curr_offset,
+            )
+
+            offset = 0
+            if self.sha_svg_append_callback:
+                item.svgs = self.sha_svg_append_callback(item.entry)
+
+                offset = 20
+                for elem in item.svgs:
+                    bnds = elem.bounds
+                    offset += bnds[3]-bnds[2] + 10
+
+            item.offset = offset
+
+            curr_offset_date = item.date_time
+            lane_progess_map[lane.ref_name] = item.ypos + offset
+
+    def _render_lanes(self):
+        for lane in self.lanes:
+            lypos = -10
+            self.append_child(
+                self._create_lane_head_svg_element(lypos, lane))
 
     def _render_positions(self):
-        pass
+        for item in self._sorted_items():
+            lane = self.id_lane_map[item.id]
+            return_elems = self._create_commit_svg_element(
+                lane.xpos, item.ypos, item)
+            self.extend_childs(return_elems)
 
     def _render_connections(self):
         lane_prev_pos = {}
@@ -317,58 +374,9 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
             Svg: Svg Object
         """
         self._create_lanes()
-
-        lane_progess_map = {}
-        lane_initial_datetime_map = {
-            x.ref_name: x.items[0].date_time for x in self.lanes
-        }
-
-        curr_offset_date = max(lane_initial_datetime_map.values())
-        curr_offset = 30
-
-        day_scale = 80
-
-        for index, lane in enumerate(self.lanes):
-            lane.xpos = index*self.column_spacing
-            lypos = -10
-            self.append_child(
-                self._create_lane_head_svg_element(lypos, lane))
-
-        from_ids = {x.from_id: x for x in self.connections}
-
-        # plot items
-        for item in self._sorted_items():
-            lane = self.id_lane_map[item.id]
-
-            days_from_offset = (
-                curr_offset_date-item.date_time
-            ).total_seconds() / SECONDS_IN_DAY
-            delta_offset = day_scale*days_from_offset
-
-            delta_offset = min(delta_offset, MAX_GAP)
-
-            curr_offset = curr_offset + delta_offset
-
-            if item.id in from_ids:
-                connect = from_ids[item.id]
-                to_ypos, to_offset = self.id_item_map[connect.to_id].pos_info
-                curr_offset = max(curr_offset, to_ypos + to_offset + 20)
-
-            item.ypos = max(
-                curr_offset,
-                lane_progess_map[lane.ref_name] +
-                10 if lane.ref_name in lane_progess_map else curr_offset,
-            )
-
-            return_elems, offset = self._create_commit_svg_element(
-                lane.xpos, item.ypos, item.entry)
-            item.svgs = return_elems
-            item.offset = offset
-            self.extend_childs(return_elems)
-
-            curr_offset_date = item.date_time
-            lane_progess_map[lane.ref_name] = item.ypos + offset
-
+        self._calculate_positions()
+        self._render_lanes()
+        self._render_positions()
         self._render_connections()
 
         return super()._layout(x_con_min, x_con_max, y_con_min, y_con_max)
