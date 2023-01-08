@@ -310,7 +310,7 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
                 corner_radius=8,
             ))
 
-    def create_svg(self) -> Svg:  # pylint: disable=too-many-locals, too-many-statements
+    def _layout(self, x_con_min, x_con_max, y_con_min, y_con_max):
         """Creates Svg object out of tree information
 
         Returns:
@@ -371,4 +371,4 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
 
         self._render_connections()
 
-        return self
+        return super()._layout(x_con_min, x_con_max, y_con_min, y_con_max)

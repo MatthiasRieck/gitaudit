@@ -107,7 +107,7 @@ class TestTreePlot(TestCase):
             ['main', 'branch', 'hotfix'],
         )
 
-        assert_equal_svg(plot.create_svg())
+        assert_equal_svg(plot)
 
     def test_sha_svg_append_callback(self):
         hier_log_root = get_hier_log(NEW_EXAMPLE)
@@ -135,7 +135,7 @@ class TestTreePlot(TestCase):
             ['main', 'branch', 'hotfix'],
         )
 
-        assert_equal_svg(plot.create_svg())
+        assert_equal_svg(plot)
 
     def test_show_commit_callback(self):
         hier_log_root = get_hier_log(NEW_EXAMPLE)
@@ -162,7 +162,7 @@ class TestTreePlot(TestCase):
             ['main', 'branch', 'hotfix'],
         )
 
-        assert_equal_svg(plot.create_svg())
+        assert_equal_svg(plot)
 
     def test_show_commit_callback_sha_svg_append_callback(self):
         hier_log_root = get_hier_log(NEW_EXAMPLE)
@@ -194,7 +194,7 @@ class TestTreePlot(TestCase):
             ['main', 'branch', 'hotfix'],
         )
 
-        assert_equal_svg(plot.create_svg())
+        assert_equal_svg(plot)
 
     def test_ref_name_formatting_callback(self):
         hier_log_root = get_hier_log(NEW_EXAMPLE)
@@ -228,4 +228,4 @@ class TestTreePlot(TestCase):
             ['main', 'branch', 'hotfix'],
         )
 
-        assert_equal_svg(plot.create_svg())
+        assert_equal_svg(plot)
