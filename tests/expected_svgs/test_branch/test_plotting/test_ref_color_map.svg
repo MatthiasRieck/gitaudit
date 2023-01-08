@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="793.3000000000001" height="266.5" viewBox="-19.20 -26.00 793.30 266.50">
+  <g>
+    <path d="M 600.00 30.00 L 600.00 30.00" stroke="#ffb3ba" stroke-width="3px" fill="transparent"></path>
+    <path d="M 200.00 0.00 L 200.00 80.00" stroke="#baffc9" stroke-width="3px" fill="transparent"></path>
+    <path d="M 0.00 0.00 L 0.00 130.00" stroke="#bae1ff" stroke-width="3px" fill="transparent"></path>
+    <path d="M 200.00 80.00 L 200.00 130.00" stroke="#baffc9" stroke-width="3px" fill="transparent"></path>
+    <path d="M 400.00 130.00 L 400.00 130.00" stroke="#ffdfba" stroke-width="3px" fill="transparent"></path>
+    <path d="M 200.00 130.00 L 200.00 180.00" stroke="#baffc9" stroke-width="3px" fill="transparent"></path>
+    <path d="M 0.00 130.00 L 0.00 230.00" stroke="#bae1ff" stroke-width="3px" fill="transparent"></path>
+    <path d="M 0.00 230.00 L 192.00 230.00 A 8.00 8.00 0 0 0 200.00 222.00 L 200.00 180.00" stroke="#baffc9" stroke-width="3px" fill="transparent"></path>
+    <path d="M 200.00 180.00 L 392.00 180.00 A 8.00 8.00 0 0 0 400.00 172.00 L 400.00 130.00" stroke="#ffdfba" stroke-width="3px" fill="transparent"></path>
+    <path d="M 200.00 130.00 L 592.00 130.00 A 8.00 8.00 0 0 0 600.00 122.00 L 600.00 30.00" stroke="#ffb3ba" stroke-width="3px" fill="transparent"></path>
+  </g>
+  <g transform="translate(0.0, -10.0)">
+    <text x="0" y="0" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">main</text>
+  </g>
+  <g transform="translate(200.0, -10.0)">
+    <text x="0" y="0" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">branch</text>
+  </g>
+  <g transform="translate(400.0, 120.0)">
+    <text x="0" y="0" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">hotfix</text>
+  </g>
+  <g transform="translate(600.0, 20.0)">
+    <text x="0" y="0" text-anchor="middle" dominant-baseline="text-top" font-family="monospace" font-size="16.0" font-weight="normal">hotfix_2</text>
+  </g>
+  <g transform="translate(600.0, 30.0)">
+    <circle cx="0" cy="0" r="5" stroke="#ffb3ba" stroke-width="3px" fill="white"></circle>
+  </g>
+  <g transform="translate(600.0, 30.0)">
+    <g>
+      <rect x="10" y="-10.0" width="163.6" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">def (2022-01-07)</text>
+    </g>
+  </g>
+  <g transform="translate(200.0, 80.0)">
+    <circle cx="0" cy="0" r="5" stroke="#baffc9" stroke-width="3px" fill="white"></circle>
+  </g>
+  <g transform="translate(200.0, 80.0)">
+    <g>
+      <rect x="10" y="-10.0" width="154.0" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">ab (2022-01-05)</text>
+    </g>
+  </g>
+  <g transform="translate(0.0, 130.0)">
+    <circle cx="0" cy="0" r="5" stroke="#bae1ff" stroke-width="3px" fill="white"></circle>
+  </g>
+  <g transform="translate(0.0, 130.0)">
+    <g>
+      <rect x="10" y="-10.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">d (2022-01-04)</text>
+    </g>
+  </g>
+  <g transform="translate(200.0, 130.0)">
+    <circle cx="0" cy="0" r="5" stroke="#baffc9" stroke-width="3px" fill="white"></circle>
+  </g>
+  <g transform="translate(200.0, 130.0)">
+    <g>
+      <rect x="10" y="-10.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">f (2022-01-04)</text>
+    </g>
+  </g>
+  <g transform="translate(400.0, 130.0)">
+    <circle cx="0" cy="0" r="5" stroke="#ffdfba" stroke-width="3px" fill="white"></circle>
+  </g>
+  <g transform="translate(400.0, 130.0)">
+    <g>
+      <rect x="10" y="-10.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">4 (2022-01-04)</text>
+    </g>
+  </g>
+  <g transform="translate(200.0, 180.0)">
+    <circle cx="0" cy="0" r="5" stroke="#baffc9" stroke-width="3px" fill="white"></circle>
+  </g>
+  <g transform="translate(200.0, 180.0)">
+    <g>
+      <rect x="10" y="-10.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">e (2022-01-03)</text>
+    </g>
+  </g>
+  <g transform="translate(0.0, 230.0)">
+    <circle cx="0" cy="0" r="5" stroke="#bae1ff" stroke-width="3px" fill="white"></circle>
+  </g>
+  <g transform="translate(0.0, 230.0)">
+    <g>
+      <rect x="10" y="-10.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
+      <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">b (2022-01-02)</text>
+    </g>
+  </g>
+</svg>

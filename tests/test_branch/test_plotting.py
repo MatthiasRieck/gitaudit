@@ -307,3 +307,39 @@ class TestTreePlot(TestCase):
             plot.directly_connected_to_root_refs,
             ['main', 'branch']
         )
+
+    def test_ref_color_map(self):
+        hier_log_root = get_hier_log(NEW_EXAMPLE)
+        hier_log_branch = get_hier_log(NEW_EXAMPLE_BRANCH)
+        hier_log_hotfix = get_hier_log(NEW_EXAMPLE_HOTFIX)
+        hier_log_hotfix_2 = get_hier_log(NEW_EXAMPLE_HOTFIX_2)
+
+        tree = Tree()
+        tree.append_log(hier_log_root, 'main')
+        tree.append_log(hier_log_branch, 'branch')
+        tree.append_log(hier_log_hotfix, 'hotfix')
+        tree.append_log(hier_log_hotfix_2, 'hotfix_2')
+
+        plot = TreePlot(
+            tree,
+            active_refs=['main', 'branch'],
+            ref_color_map={
+                "main": "#bae1ff",
+                "branch": "#baffc9",
+                "hotfix": "#ffdfba",
+                "hotfix_2": "#ffb3ba",
+            },
+            graph_stroke_width_px=3,
+        )
+
+        self.assertEqual(
+            plot.determine_ref_name_order(),
+            ['main', 'branch', 'hotfix', 'hotfix_2'],
+        )
+
+        assert_equal_svg(plot)
+
+        self.assertEqual(
+            plot.directly_connected_to_root_refs,
+            ['main', 'branch']
+        )
