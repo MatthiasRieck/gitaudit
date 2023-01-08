@@ -38,6 +38,16 @@ NEW_EXAMPLE_HOTFIX = [
     "b[a](2022-01-02)",
     "a[](2022-01-01)",
 ]
+NEW_EXAMPLE_HOTFIX_2 = [
+    "def[da](2022-01-07)",
+    "da[de](2022-01-06)",
+    "de[f](2022-01-05)",
+    "f[e](2022-01-04)",
+    "e[34](2022-01-03)",
+    "34[b](2022-01-02T10:00)",
+    "b[a](2022-01-02)",
+    "a[](2022-01-01)",
+]
 
 
 class TestTreePlot(TestCase):
@@ -52,7 +62,7 @@ class TestTreePlot(TestCase):
         self.assertDictEqual(
             plot._get_end_seg_counts(),
             {
-                "main": (0, 1, -4)
+                "main": (0, True, 1, -4)
             }
         )
         self.assertEqual(
@@ -73,8 +83,8 @@ class TestTreePlot(TestCase):
         self.assertDictEqual(
             plot._get_end_seg_counts(),
             {
-                "main": (0, 1, -2),
-                "branch": (172800, 2, -6)
+                "main": (0, True, 1, -2),
+                "branch": (172800, True, 2, -6)
             }
         )
         self.assertEqual(
@@ -97,9 +107,9 @@ class TestTreePlot(TestCase):
         self.assertDictEqual(
             plot._get_end_seg_counts(),
             {
-                "main": (0, 1, -2),
-                "branch": (172800, 3, -6),
-                "hotfix": (172800, 3, -5),
+                "main": (0, False, 1, -2),
+                "branch": (172800, False, 3, -6),
+                "hotfix": (172800, False, 3, -5),
             }
         )
         self.assertEqual(
@@ -129,9 +139,9 @@ class TestTreePlot(TestCase):
         self.assertDictEqual(
             plot._get_end_seg_counts(),
             {
-                "main": (0, 1, -2),
-                "branch": (172800, 3, -6),
-                "hotfix": (172800, 3, -5),
+                "main": (0, False, 1, -2),
+                "branch": (172800, False, 3, -6),
+                "hotfix": (172800, False, 3, -5),
             }
         )
         self.assertEqual(
@@ -160,9 +170,9 @@ class TestTreePlot(TestCase):
         self.assertDictEqual(
             plot._get_end_seg_counts(),
             {
-                "main": (0, 1, -2),
-                "branch": (172800, 3, -6),
-                "hotfix": (172800, 3, -5),
+                "main": (0, False, 1, -2),
+                "branch": (172800, False, 3, -6),
+                "hotfix": (172800, False, 3, -5),
             }
         )
         self.assertEqual(
@@ -193,9 +203,9 @@ class TestTreePlot(TestCase):
         self.assertDictEqual(
             plot._get_end_seg_counts(),
             {
-                "main": (0, 1, -2),
-                "branch": (172800, 3, -6),
-                "hotfix": (172800, 3, -5),
+                "main": (0, False, 1, -2),
+                "branch": (172800, False, 3, -6),
+                "hotfix": (172800, False, 3, -5),
             }
         )
         self.assertEqual(
@@ -228,9 +238,9 @@ class TestTreePlot(TestCase):
         self.assertDictEqual(
             plot._get_end_seg_counts(),
             {
-                "main": (0, 1, -2),
-                "branch": (172800, 3, -6),
-                "hotfix": (172800, 3, -5),
+                "main": (0, False, 1, -2),
+                "branch": (172800, False, 3, -6),
+                "hotfix": (172800, False, 3, -5),
             }
         )
         self.assertEqual(
@@ -255,14 +265,35 @@ class TestTreePlot(TestCase):
         self.assertDictEqual(
             plot._get_end_seg_counts(),
             {
-                "main": (0, 1, -2),
-                "branch": (172800, 3, -6),
-                "hotfix": (172800, 3, -5),
+                "main": (0, False, 1, -2),
+                "branch": (172800, False, 3, -6),
+                "hotfix": (172800, True, 3, -5),
             }
         )
         self.assertEqual(
             plot.determine_ref_name_order(),
             ['main', 'branch', 'hotfix'],
+        )
+
+        assert_equal_svg(plot)
+
+    def test_active_refs_branch_ordering(self):
+        hier_log_root = get_hier_log(NEW_EXAMPLE)
+        hier_log_branch = get_hier_log(NEW_EXAMPLE_BRANCH)
+        hier_log_hotfix = get_hier_log(NEW_EXAMPLE_HOTFIX)
+        hier_log_hotfix_2 = get_hier_log(NEW_EXAMPLE_HOTFIX_2)
+
+        tree = Tree()
+        tree.append_log(hier_log_root, 'main')
+        tree.append_log(hier_log_branch, 'branch')
+        tree.append_log(hier_log_hotfix, 'hotfix')
+        tree.append_log(hier_log_hotfix_2, 'hotfix_2')
+
+        plot = TreePlot(tree, active_refs=['main', 'branch'])
+
+        self.assertEqual(
+            plot.determine_ref_name_order(),
+            ['main', 'branch', 'hotfix', 'hotfix_2'],
         )
 
         assert_equal_svg(plot)

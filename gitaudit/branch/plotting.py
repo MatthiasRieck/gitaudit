@@ -162,7 +162,10 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
                     sha_count += curr_segment.length
 
             ref_name_counts[segment.branch_name] = (
-                seconds_from_root_end, seg_count, -sha_count
+                seconds_from_root_end,
+                segment.branch_name not in self.active_refs,
+                seg_count,
+                -sha_count
             )
 
         return ref_name_counts
