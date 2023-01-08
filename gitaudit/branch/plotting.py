@@ -88,6 +88,8 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
             self,
             tree: Tree,
             active_refs: List[str] = None,
+            ref_color_map: Dict[str, str] = None,
+            graph_stroke_width_px: int = 1,
             column_spacing: float = 200.0,
             show_commit_callback=None,
             sha_svg_append_callback=None,
@@ -96,6 +98,8 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
         super().__init__()
         self.tree = tree
         self.active_refs = active_refs if active_refs else []
+        self.ref_color_map = ref_color_map if ref_color_map else {}
+        self.graph_stroke_width_px = graph_stroke_width_px
         self.directly_connected_to_root_refs = []
         self.column_spacing = column_spacing
         self.end_sha_seg_map = {
@@ -232,10 +236,16 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
 
     def _create_commit_svg_elems(self):
         for item in self._sorted_items():
+            lane = self.id_lane_map[item.id]
+            ref_color = self.ref_color_map.get(lane.ref_name, 'black')
             if self.sha_svg_append_callback:
                 item.svgs = self.sha_svg_append_callback(item.entry)
 
-            item.commit_circle_svg = Circle(0, 0, 5)
+            item.commit_circle_svg = Circle(
+                0, 0, 5,
+                stroke=ref_color,
+                stroke_width_px=self.graph_stroke_width_px,
+            )
 
             text = Text(
                 15,
@@ -382,16 +392,21 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
 
         for item in self._sorted_items():
             lane = self.id_lane_map[item.id]
+            ref_color = self.ref_color_map.get(lane.ref_name, 'black')
             if lane.ref_name in lane_prev_pos:
                 self.group_lines.append_child(Path(
                     points=[lane_prev_pos[lane.ref_name],
-                            (lane.xpos, item.ypos)]
+                            (lane.xpos, item.ypos)],
+                    stroke=ref_color,
+                    stroke_width_px=self.graph_stroke_width_px,
                 ))
             else:
                 offset = 0 if lane.ref_name in self.active_refs else lane.items[0].ypos
                 self.group_lines.append_child(Path(
                     points=[(lane.xpos, offset-0),
-                            (lane.xpos, item.ypos)]
+                            (lane.xpos, item.ypos)],
+                    stroke=ref_color,
+                    stroke_width_px=self.graph_stroke_width_px,
                 ))
             lane_prev_pos[lane.ref_name] = (lane.xpos, item.ypos)
 
@@ -401,10 +416,13 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
             f_y, _ = self.id_item_map[connection.from_id].pos_info
             t_lane = self.id_lane_map[connection.to_id]
             t_y, _ = self.id_item_map[connection.to_id].pos_info
+            ref_color = self.ref_color_map.get(t_lane.ref_name, 'black')
             self.group_lines.append_child(Path(
                 points=[(f_lane.xpos, f_y), (t_lane.xpos, f_y),
                         (t_lane.xpos, t_y)],
                 corner_radius=8,
+                stroke=ref_color,
+                stroke_width_px=self.graph_stroke_width_px,
             ))
 
     def _layout(self, x_con_min, x_con_max, y_con_min, y_con_max):
