@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="793.3000000000001" height="266.5" viewBox="-19.20 -26.00 793.30 266.50">
   <g>
     <path d="M 600.00 30.00 L 600.00 30.00" stroke="black" stroke-width="1px" fill="transparent"></path>
-    <path d="M 200.00 0.00 L 200.00 80.00" stroke="black" stroke-width="1px" fill="transparent"></path>
+    <path d="M 200.00 0.00 L 200.00 96.67" stroke="black" stroke-width="1px" fill="transparent"></path>
     <path d="M 0.00 0.00 L 0.00 130.00" stroke="black" stroke-width="1px" fill="transparent"></path>
-    <path d="M 200.00 80.00 L 200.00 130.00" stroke="black" stroke-width="1px" fill="transparent"></path>
+    <path d="M 200.00 96.67 L 200.00 130.00" stroke="black" stroke-width="1px" fill="transparent"></path>
     <path d="M 400.00 130.00 L 400.00 130.00" stroke="black" stroke-width="1px" fill="transparent"></path>
     <path d="M 200.00 130.00 L 200.00 180.00" stroke="black" stroke-width="1px" fill="transparent"></path>
     <path d="M 0.00 130.00 L 0.00 230.00" stroke="black" stroke-width="1px" fill="transparent"></path>
@@ -32,10 +32,10 @@
       <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">def (2022-01-07)</text>
     </g>
   </g>
-  <g transform="translate(200.0, 80.0)">
+  <g transform="translate(200.0, 96.66666666666666)">
     <circle cx="0" cy="0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <g transform="translate(200.0, 80.0)">
+  <g transform="translate(200.0, 96.66666666666666)">
     <g>
       <rect x="10" y="-10.0" width="154.0" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
       <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">ab (2022-01-05)</text>

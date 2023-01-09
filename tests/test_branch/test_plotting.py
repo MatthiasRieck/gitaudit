@@ -343,3 +343,26 @@ class TestTreePlot(TestCase):
             plot.directly_connected_to_root_refs,
             ['main', 'branch']
         )
+
+    def test_linear_correction(self):
+        hier_log_root = get_hier_log([
+            "d[a](2022-01-04)",
+            "a[](2022-01-01)",
+        ])
+        hier_log_branch = get_hier_log([
+            "c[a](2022-01-02)",
+            "a[](2022-01-01)",
+        ])
+
+        tree = Tree()
+        tree.append_log(hier_log_root, 'main')
+        tree.append_log(hier_log_branch, 'branch')
+
+        plot = TreePlot(
+            tree,
+            active_refs=['main', 'branch'],
+            sha_svg_append_callback=lambda x:
+                [Circle(0, 0, 10)]*8 if x.sha == 'd' else [],
+        )
+
+        assert_equal_svg(plot)
