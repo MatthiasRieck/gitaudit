@@ -7,9 +7,9 @@
     <path d="M 0.00 80.00 L 0.00 130.00" stroke="black" stroke-width="1px" fill="transparent"></path>
     <path d="M 200.00 80.00 L 200.00 130.00" stroke="black" stroke-width="1px" fill="transparent"></path>
     <path d="M 200.00 130.00 L 200.00 176.67" stroke="black" stroke-width="1px" fill="transparent"></path>
-    <path d="M 0.00 130.00 L 0.00 210.00" stroke="black" stroke-width="1px" fill="transparent"></path>
-    <path d="M 0.00 210.00 L 0.00 260.00" stroke="black" stroke-width="1px" fill="transparent"></path>
-    <path d="M 0.00 210.00 L 192.00 210.00 A 8.00 8.00 0 0 0 200.00 202.00 L 200.00 176.67" stroke="black" stroke-width="1px" fill="transparent"></path>
+    <path d="M 0.00 130.00 L 0.00 201.18" stroke="black" stroke-width="1px" fill="transparent"></path>
+    <path d="M 0.00 201.18 L 0.00 260.00" stroke="black" stroke-width="1px" fill="transparent"></path>
+    <path d="M 0.00 201.18 L 192.00 201.18 A 8.00 8.00 0 0 0 200.00 193.18 L 200.00 176.67" stroke="black" stroke-width="1px" fill="transparent"></path>
     <path d="M 200.00 130.00 L 392.00 130.00 A 8.00 8.00 0 0 0 400.00 122.00 L 400.00 80.00" stroke="black" stroke-width="1px" fill="transparent"></path>
   </g>
   <g transform="translate(0.0, -10.0)">
@@ -84,10 +84,10 @@
       <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">34 (2022-01-02)</text>
     </g>
   </g>
-  <g transform="translate(0.0, 210.00000000000003)">
+  <g transform="translate(0.0, 201.1764705882353)">
     <circle cx="0" cy="0" r="5" stroke="black" stroke-width="1px" fill="white"></circle>
   </g>
-  <g transform="translate(0.0, 210.00000000000003)">
+  <g transform="translate(0.0, 201.1764705882353)">
     <g>
       <rect x="10" y="-10.0" width="144.4" height="20.0" stroke="transparent" stroke-width="1px" fill="white" rx="8" ry="8"></rect>
       <text x="15" y="0" text-anchor="start" dominant-baseline="central" font-family="monospace" font-size="16.0" font-weight="normal">b (2022-01-02)</text>

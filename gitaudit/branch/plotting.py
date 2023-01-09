@@ -91,6 +91,7 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
             ref_color_map: Dict[str, str] = None,
             graph_stroke_width_px: int = 1,
             column_spacing: float = 200.0,
+            apply_linear_vert_pos_correction: bool = True,
             show_commit_callback=None,
             sha_svg_append_callback=None,
             ref_name_formatting_callback=None,
@@ -100,6 +101,7 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
         self.active_refs = active_refs if active_refs else []
         self.ref_color_map = ref_color_map if ref_color_map else {}
         self.graph_stroke_width_px = graph_stroke_width_px
+        self.apply_linear_vert_pos_correction = apply_linear_vert_pos_correction
         self.directly_connected_to_root_refs = []
         self.column_spacing = column_spacing
         self.end_sha_seg_map = {
@@ -364,6 +366,38 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
             curr_offset_date = item.date_time
             lane_progess_map[lane.ref_name] = item.ypos + offset
 
+    def _linear_position_correction(self):
+        if not self.apply_linear_vert_pos_correction:
+            return
+
+        items = self._sorted_items()
+        for index, item in enumerate(items):
+            if index in {0, len(items)-1}:
+                continue
+
+            lane = self.id_lane_map[item.id]
+
+            prev_y = items[index+1].ypos
+            prev_d = items[index+1].date_time
+            next_y = items[index-1].ypos
+            next_d = items[index-1].date_time
+
+            prev_next_ts = (next_d-prev_d).total_seconds()
+
+            if prev_next_ts >= 0.001:
+                item.ypos = prev_y + (next_y-prev_y) * \
+                    (item.date_time-prev_d).total_seconds() / prev_next_ts
+            else:
+                item.ypos = (prev_y + next_y) / 2.0
+
+            item_lane_index = lane.items.index(item)
+            if item_lane_index > 0:
+                prev_lane_item = lane.items[item_lane_index-1]
+                item.ypos = max(
+                    item.ypos,
+                    prev_lane_item.ypos + prev_lane_item.offset + 20,
+                )
+
     def _render_lanes(self):
         for lane in self.lanes:
             if lane.ref_name in self.active_refs:
@@ -435,6 +469,7 @@ class TreePlot(Svg):  # pylint: disable=too-many-instance-attributes
         self._create_lane_ref_svg_elems()
         self._create_commit_svg_elems()
         self._calculate_positions()
+        self._linear_position_correction()
         self._render_lanes()
         self._render_positions()
         self._render_connections()
